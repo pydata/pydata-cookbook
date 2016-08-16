@@ -55,6 +55,7 @@ Combine the best principles of open source development and academic publication.
 
 These dates are the 
 
+- Sept 1st - Initial PR with title, abstract, and authors
 - Nov 15th - Initial submissions
 - Nov 22th - Reviewers assigned
 - Dec 30th - Reviews due
