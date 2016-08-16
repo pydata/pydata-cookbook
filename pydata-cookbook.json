@@ -1,0 +1,21 @@
+{
+  "book": {
+     "citation_key": "pydata-cookbook-2016",
+     "title": {
+       "acronym": "PyData",
+       "short": "PyData CookBook",
+       "full": "PyData CookBook"
+     },
+     "year": "2016",
+     "editor": [
+        "Andy R. Terrel",
+        "Jarrod Millman"
+     ],
+     "isbn": "value",
+     "copyright": {
+       "article": "",
+       "license": ""}
+  }
+}
+
+
