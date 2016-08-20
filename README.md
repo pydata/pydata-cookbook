@@ -1,5 +1,18 @@
 # PyData Cookbook
 
+ We are starting a project to build a cookbook of advanced material for the PyData community. The cookbook will be published by Addison-Wesley. We have invited a number of contributors to see if such a project would have some interest and received overwhelmingly positive feedback. 
+
+The book will cover several major topics, organized as such, with some sample packages:
+
+- IDE: IPython/Jupyter
+- Data Structures / Numerics: NumPy, Pandas, Xray, PyTables
+- Viz: Matplotlib, Bokeh, Seaborn, yt
+- Algorithms / Science: SciPy, Scikit-learn, Scikit-image, statsmodels, sympy, gensim
+- Performance / Scale: Cython, Numexpr, Numba, Dask, pyspark
+
+
+We expect each submission to be about 15 - 20 pages describing an example of the power of each library. While we have reached out to the projects about putting each submission together we are happy to accept chapters for libraries we did not initially identify.
+
 ## Instructions for Reviewers
 
 - Click on the Pull Requests Tab and browse to find the papers assigned to you
@@ -23,7 +36,7 @@ considered received once a Pull Request has been opened following the procedure
 outlines below.
 
 Papers are formatted using reStructuredText and the compiled version should be
-no longer than 15 pages, including figures.  Here are the steps to produce a
+no longer than 25 pages, including figures.  Here are the steps to produce a
 paper:
 
 - Fork the
