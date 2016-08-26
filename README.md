@@ -7,7 +7,7 @@ The book will cover several major topics, organized as such, with some sample pa
 - IDE: IPython/Jupyter
 - Data Structures / Numerics: NumPy, Pandas, Xray, PyTables
 - Viz: Matplotlib, Bokeh, Seaborn, yt
-- Algorithms / Science: SciPy, Scikit-learn, Scikit-image, statsmodels, sympy, gensim
+- Algorithms / Science: SciPy, Scikit-learn, Scikit-image, statsmodels, sympy, gensim, XGBoost
 - Performance / Scale: Cython, Numexpr, Numba, Dask, pyspark
 
 
