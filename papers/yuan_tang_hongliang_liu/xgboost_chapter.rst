@@ -1,6 +1,6 @@
 :author: Yuan Tang
 :email: terrytangyuan@gmail.com
-:institution: Uptake Technologies, Inc.
+:institution:
 :corresponding:
 
 :author: Hongliang Liu
