@@ -8,7 +8,7 @@
 :institution: Joint Unit CNRS/Saint-Gobain Surface of Glass and Interfaces, Aubervilliers, France 
 :equal-contributor:
 
-:author: Alexandre de Siqueira
+:author: Alexandre F. de Siqueira
 :email: alexandredesiqueira@programandociencia.com
 :institution: University of Campinas, Campinas, Brazil
 :institution: TU Bergakademie Freiberg, Freiberg, Germany
@@ -19,9 +19,14 @@
 :institution: 
 :equal-contributor:
 
-------------------------------------------------
+:author: Joshua D. Warner
+:email: joshua.dale.warner@gmail.com
+:institution: Mayo Clinic, Rochester, USA
+:equal-contributor:
+
+----------------------------------------
 scikit-image: image processing in Python
-------------------------------------------------
+----------------------------------------
 
 .. class:: abstract
 
