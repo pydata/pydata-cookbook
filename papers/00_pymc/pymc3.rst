@@ -1,4 +1,4 @@
-:authors: Christopher Fonnesbeck
+:author: Christopher Fonnesbeck
 :email: chris.fonnesbeck@vanderbilt.edu
 :institution: Vanderbilt University Medical Center
 
