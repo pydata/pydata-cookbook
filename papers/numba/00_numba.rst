@@ -22,6 +22,6 @@ Numba: A Compiler for Python and NumPy
 
    compiler, hpc, numpy
 
-.. include:: output/00_numba/intro/intro.rst
+.. include:: output/numba/intro/intro.rst
 
-.. include:: output/00_numba/piecewise/piecewise.rst
+.. include:: output/numba/piecewise/piecewise.rst
