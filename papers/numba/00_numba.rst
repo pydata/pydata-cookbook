@@ -27,3 +27,5 @@ Numba: A Compiler for Python and NumPy
 .. include:: output/numba/array_vs_list/array_vs_list.rst
 
 .. include:: output/numba/piecewise/piecewise.rst
+
+.. include:: output/numba/looplifting/looplifting.rst
