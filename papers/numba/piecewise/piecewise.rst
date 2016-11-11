@@ -99,11 +99,11 @@ function like this:
         else:
             return (x - 1)**2
 
-Like ``@jit``, we do not need to specify the data types[#]_ of the input.
+Like ``@jit``, we do not need to specify the data types [#]_ of the input.
 This implementation is much more readable, and for our test case of 50,000
 input elements, it is 24x faster than the original!
 
-.. [#] Types are needed for ``@vectorize`` when automatically using compilation targets like ``"parallel"`` or ``"cuda"``.
+.. [#] Types are needed for ``@vectorize`` when using compilation targets like ``"parallel"`` or ``"cuda"``.
 
 
 This miraculous-seeming result is a result of rewriting the function so that
