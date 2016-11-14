@@ -3,7 +3,7 @@
 :institution: Continuum Analytics
 
 :author: Antoine Pitrou
-:email: antoine.pitrou@continuum.io 
+:email: antoine.pitrou@continuum.io
 :institution: Continuum Analytics
 
 :author: Stan Seibert
@@ -16,7 +16,7 @@ Numba: A Compiler for Python and NumPy
 
 .. class:: abstract
 
-   Numba is a just-in-time compiler for Python functions aimed primarily at numerical applications.  Numba performs automatic type inference and generates optimized machine code using the LLVM compiler toolkit.  Numba includes built-in support for NumPy arrays and many standard NumPy functions, but can be extended to support additional data types and custom operations.  The Numba compiler can produce several different kinds of executable objects such as regular functions, NumPy universal functions (ufuncs), and GPU compute kernels.  In addition, Numba can automatically parallelize ufuncs for execution on multicore CPUs and GPUs. 
+   Numba is a just-in-time compiler for Python functions aimed primarily at numerical applications.  Numba performs automatic type inference and generates optimized machine code using the LLVM compiler toolkit.  Numba includes built-in support for NumPy arrays and many standard NumPy functions, but can be extended to support additional data types and custom operations.  The Numba compiler can produce several different kinds of executable objects such as regular functions, NumPy universal functions (ufuncs), and GPU compute kernels.  In addition, Numba can automatically parallelize ufuncs for execution on multicore CPUs and GPUs.
 
 .. class:: keywords
 
@@ -29,3 +29,5 @@ Numba: A Compiler for Python and NumPy
 .. include:: output/numba/piecewise/piecewise.rst
 
 .. include:: output/numba/looplifting/looplifting.rst
+
+.. include:: output/numba/nogilthreads/nogilthreads.rst
