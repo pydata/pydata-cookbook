@@ -22,7 +22,7 @@ Numba: A Compiler for Python and NumPy
 
    compiler, hpc, numpy
 
-.. include:: output/numba/intro/intro.rst
+.. COMMENT .. include:: output/numba/intro/intro.rst
 
 .. include:: output/numba/array_vs_list/array_vs_list.rst
 
