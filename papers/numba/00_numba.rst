@@ -28,6 +28,8 @@ Numba: A Compiler for Python and NumPy
 
 .. include:: output/numba/piecewise/piecewise.rst
 
+.. include:: output/numba/gufunc/gufunc.rst
+
 .. include:: output/numba/looplifting/looplifting.rst
 
 .. include:: output/numba/nogilthreads/nogilthreads.rst
