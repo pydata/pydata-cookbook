@@ -34,14 +34,159 @@ scikit-image
 Introduction
 ------------
 
-scikit-image is an image processing…
+scikit-image is an image processing library ...
 
 Mention how ndarray allows us to fit in with rest of eco-system
 
 Parallel & distributed processing via dask
 
+Reducing noise
+--------------
 
-Panorama Stitching
+There are many types of noise which can affect images, and the first step to reducing unwanted noise is to understand what kind of noise is present.  In scikit-image, there is a noise generation utility named ``random_noise`` located in ``skimage.util`` which can generate most commonly encountered types of noise.  In Figure :ref:`noise-types` we show a comparison of several common noise types applied to a crop of the ``astronaut`` image available in ``skimage.data`` [#]_. This crop has both fine detail in the NASA patch and flat fields, so it is a good example to evaluate denoising algorithms.
+
+.. [#] Press photograph of NASA astronaut Eileen Collins, in the public domain.
+
+.. figure:: noise_types.png
+   :align: center
+   :scale: 65%
+
+   Original, clean image and four different types of noise applied to it with ``skimage.util.random_noise``.  Poisson noise is subtle, but difficult to remove, whereas gaussian as well as salt & pepper are not subtle but also challenging.
+
+It should come as no surprise that a particular denoising algorithm may be stronger or weaker at removing a particular kind of noise.  In this example the noise type is speckle noise, which is a kind of multiplicative noise often encountered in ultrasound medical imaging. Three different denoising algorithms implemented in scikit-image will be applied: total variation, bilateral, and wavelet denoising.
+
+The act of denoising is always a balance.  It is almost never possible to entirely remove noise; doing so would eliminate the fine features and texture one desires to keep.  When used to excess, or with parameters set too high, denoising algorithms typically produce “posterized” images with flat domains separated by sharp edges.  Denoising is thus typically an iterative approach to control the tradeoff between smoothing and faithfulness to the original image by tuning function parameters.
+
+.. code-block:: python
+
+   from skimage import data, img_as_float
+   from skimage.util import random_noise
+
+   astronaut = img_as_float(data.astronaut())
+   astro = astronaut[300:450, 100:320]
+
+   sigma = 0.3
+   noisy = random_noise(img_astro, var=sigma**2)
+
+The ``noisy`` image generated here and seen in Figure :ref:`fig-denoise` is what our approaches below will attempt to fix.  Denoising algorithms are located in ``skimage.restoration``, prefixed with ``denoise_``.
+
+.. figure:: denoise.png
+   :align: center
+
+   Top row: original image and with speckle noise applied. Subsequent rows show total variation, bilateral, and wavelet denoising respectively with pertinent settings in the titles. :label:`denoise`
+
+Total variation minimization
+****************************
+
+Denoising by minimizing the total variation attempts to change the image in such a way as to reduce the total variation present.  Thus, if applied too strongly it will eliminate fine features of the original image along with noise.  The total variation norm being minimized is the L1 norm of the image gradient.  This is an excellent method to reduce salt-and-pepper noise.  As the norm being minimized is that of the gradient, when applied too strongly this algorithm results in very smooth results with no hard edges.
+
+There are two approaches to total variation denoising implemented in scikit-image: split-Bregman [Getreuer2012] and Chambolle [Chambolle2004]. In this example the latter is used.
+
+.. code-block:: python
+
+   from skimage.restoration import denoise_tv_chambolle
+
+   tv_cham_low = denoise_tv_chambolle(
+       img_noisy, weight=0.05, multichannel=True)
+   tv_cham_high = denoise_tv_chambolle(
+       img_noisy, weight=0.1, multichannel=True)
+
+The function ``denoise_tv_chambolle`` accepts several parameters, of which the most pertinent are ``weight`` and ``multichannel``
+
+* ``weight`` represents the denoising strength: the greater the weight, the more noise is removed (at the expense of fidelity to the input image).
+* ``multichannel`` enables the option to apply total-variation denoising separately for each color channel. This parameter defaults to ``False`` but should be set ``True`` for color images; if not, the result will have color fringing artifacts.
+
+The results of total variation denoising via the Chambolle method are shown in the second row of Figure :ref:`denoise`.
+
+
+Bilateral filter
+****************
+
+A bilateral filter [Tomasi1998] reduces noise while preserving edges. It assigns new values based on a local, weighted mean with two main features: proximity and similar value.  The bilateral filter is implemented by the function `denoise_bilateral`, contained in the module `restoration`.  This filter tends to produce piecewise-constant or cartoon-like images if applied to excess.
+
+.. code-block:: python
+
+   from skimage.restoration import denoise_bilateral
+
+   bilat_low = denoise_bilateral(
+       img_noisy, sigma_color=0.05, sigma_spatial=25)
+   bilat_high = denoise_bilateral(
+       img_noisy, sigma_color=0.1, sigma_spatial=20)
+
+``denoise_bilateral`` allows the user to control the weight given to closeness in color and spatial proximity separately with the keyword arguments ``sigma_color`` and ``sigma_spatial``:
+
+* ``sigma_color`` represents the radiometric similarity, i.e., the standard deviation for color/value distance. The expected value is on the range [0, 1].  In the default case, `None`, the standard deviation of the input image is used.
+* ``sigma_spatial`` is the standard deviation for range distance. A larger value allows more distant pixels to more strongly influence the result.
+
+The results of bilateral filter denoising are shown in the third row of Figure :ref:`denoise`.
+
+Wavelet denoising
+*****************
+
+Wavelets [#]_are a fascinating mathematical construct that can be thought of as a way to combine the best of frequency and time domain analysis.  They are applied at multiple scales.  For brevity, the most important feature of wavelets for denoising purposes is that of *sparsity*.
+
+.. [#] At time of writing, wavelet algorithms are only available in the devevelopment version of scikit-image.  They will be available in stable version of scikit-image 0.13 and above.
+
+Wavelets, when applied to 2-dimensional images, decompose the image into a representation made up of many individual wavelets.  This representation is sparse, i.e., there are relatively few wavelet coefficients with high values and many that are quite low.  Denoising simply sets a threshold below which small coefficients are discarded, then inverts the result yielding an image with less noise.  This same property is useful for image compression.
+
+.. code-block:: python
+
+   from skimage.restoration import (denoise_wavelet,
+                                    estimate_sigma)
+   # Need to estimate noise present
+   sigma_est = estimate_sigma(
+       noisy, multichannel=True, average_sigmas=True)
+
+   wave_low = denoise_wavelet(noisy, sigma=sigma_est,
+                              multichannel=True)
+   wave_high = denoise_wavelet(noisy,
+                               sigma=1.4*sigma_est,
+                               multichannel=True)
+
+The primary control over denoising strength is ``sigma=``, and there is also an algorithm to estimate the noise present ``estimage_sigma``.  Generally this is an underestimate due to clipping, as true Gaussian noise has no limit to its range but the image data does.
+
+The results of wavelet denoising are shown in the fourth row of Figure :ref:`denoise`.
+
+Corner detection
+----------------
+
+Corner detection is used to extract sharp features from an image. There are several corner detectors implemented on scikit-image. This example shows the Harris corner detector [Harris], which finds corner points and determine their position with sub-pixel precision.
+
+The input image will be based on an image of a checkerboard, given by the function ``data.checkerboard()``, but a rectangular checkerboard is too easy.  Using the functions ``warp`` and ``AffineTransform`` contained in in ``skimage.transform``, the checkerboard can be stretched and warped out of shape (see Figure :ref:`corners`)
+
+.. code-block:: python
+
+   from skimage import data
+   from skimage.transform import warp, AffineTransform
+
+   affine = AffineTransform(
+       scale=(0.8, 1.1), rotation=1, shear=0.7,
+       translation=(220, 50))
+   image = warp(data.checkerboard(), affine.inverse,
+                output_shape=(200, 310))
+
+Then we use three functions from ``skimage.feature``:
+* ``corner_harris`` compute the Harris corner measure response image.
+* ``corner_peaks`` identifies corners in a corner measure response image, like the one returned by ``corner_harris``.
+* ``corner_subpix`` determine the sub-pixel position of corners.
+
+.. code-block:: python
+
+   from skimage.feature import (corner_harris,
+                                corner_subpix,
+                                corner_peaks)
+
+   harris_coords = corner_peaks(corner_harris(image))
+   harris_subpix = corner_subpix(image, harris_coords)
+
+The detected corners are shown in Figure :ref:`corners`.
+
+.. figure:: harris_corners.png
+   :align: center
+
+   On left, the warped checkerboard.  On right, corners detected with the Harris corner detector are marked in red.  These corners are defined with sub-pixel precision, but the markers are larger for legibility. :label:`corners`
+
+Panorama stitching
 ------------------
 
 This example stitches three images into a seamless panorama using several tools in scikit-image, including feature detection [Rub11]_, RANdom SAmple Consensus (RANSAC) [Fis81]_, graph theory, and affine transformations.  The images used in this example are available at https://github.com/scikit-image/skimage-tutorials/tree/master/images/pano named ``JDW_9*.jpg``, released under the CC-BY 4.0 by the author.
@@ -163,8 +308,6 @@ Find appropriate canvas size
 Before producing the panorama, the correct size for a new canvas to hold all three warped images is needed.  The entire size, or extent, of this image is carefully found.
 
 .. code-block:: python
-
-   from skimage.transform import SimilarityTransform
 
    # All three images have the same size
    r, c = pano_images[1].shape[:2]
@@ -483,7 +626,7 @@ This function generates an ideal cost array for panorama stitching, using the pr
          Adjusted costs array, ready for use.
      """
      if vertical is not True:  # run transposed
-       return tweak_costs(
+       return generate_costs(
          diff_image.T, mask.T, vertical=True,
          gradient_cutoff=gradient_cutoff).T
 
@@ -545,7 +688,7 @@ Flood fill
 **********
 :label:`flood-fill`
 
-This Cython function is a basic flood fill algorithm which accepts an array and modifies it in place.  It starts at a defined point, which is changed to a new value, then iteratively fills outward by seeking all connected points which had the original value, changing them as well.
+This Cython function is a basic flood fill algorithm which accepts an array and modifies it in place.  The flood starts at a defined point, which is changed to a new value, then iteratively fills outward by doing the same at all connected points which carry the original value.
 
 The conceptual analogy of this algorithm is the "bucket" tool in many photo editing programs.
 
