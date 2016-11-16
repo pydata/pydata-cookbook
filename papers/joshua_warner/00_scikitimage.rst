@@ -25,7 +25,7 @@ scikit-image
 
 .. class:: abstract
 
-   scikit-image is an image processing library that implements algorithms and utilities for use in research, education and industry applications. It is released under the liberal Modified BSD open source license, provides a well-documented API in the Python programming language, and is developed by an active, international team of collaborators. In this paper we highlight the advantages of open source to achieve the goals of  the scikit-image library, and we showcase several real-world image processing applications that use scikit-image. More information can be found on the project homepage, http://scikit-image.org.
+   scikit-image is an image processing library that implements algorithms and utilities for use in research, education and industry applications. It is released under the liberal Modified BSD open source license, provides a well-documented API in the Python programming language, and is developed by an active, international team of collaborators. In this chapter we highlight the advantages of open source to achieve the goals of  the scikit-image library, and we showcase several real-world image processing applications that use scikit-image. More information can be found on the project homepage, http://scikit-image.org.
 
 .. class:: keywords
 
@@ -44,12 +44,12 @@ Parallel & distributed processing via dask
 Panorama Stitching
 ------------------
 
-This example stitches three images into a seamless panorama using several tools in scikit-image, including feature detection, RANdom SAmple Consensus (RANSAC), graph theory, and affine transformations.  The images used in this example are available at https://github.com/scikit-image/skimage-tutorials/tree/master/images/pano named `JDW_9*.jpg`.
+This example stitches three images into a seamless panorama using several tools in scikit-image, including feature detection [Rub11]_, RANdom SAmple Consensus (RANSAC) [Fis81]_, graph theory, and affine transformations.  The images used in this example are available at https://github.com/scikit-image/skimage-tutorials/tree/master/images/pano named ``JDW_9*.jpg``, released under the CC-BY 4.0 by the author.
 
 Load images
 ***********
 
-The `io` module in scikit-image allows images to be loaded and saved. In this case the color panorama images will be loaded into an iterable `ImageCollection`, though one could also load them individually.
+The ``io`` module in scikit-image allows images to be loaded and saved. In this case the color panorama images will be loaded into an iterable `ImageCollection`, though one could also load them individually.
 
 .. code-block:: python
 
@@ -60,6 +60,7 @@ The `io` module in scikit-image allows images to be loaded and saved. In this ca
 .. figure:: pano0_originals.png
    :align: center
    :figclass: w
+   :scale: 60%
 
    Panorama source images, taken on the trail to Delicate Arch in Arches National Park, USA.  Released under CC-BY 4.0 by Joshua D. Warner. :label:`fig-pano0`
 
@@ -67,14 +68,16 @@ Feature detection and matching
 ******************************
 
 To correctly align the images, a *projective* transformation relating them is required.
+
 1. Define one image as a *target* or *destination* image, which will remain anchored while the others are warped.
 2. Detect features in all three images.
 3. Match features from left and right images against the features in the center, anchored image.
 
-In this series, the middle image is the logical anchor point.  Numerous feature detection algorithms are available; this example will use Oriented FAST and rotated BRIEF (ORB) features available as `skimage.feature.ORB` [Rub11]_.
+In this series, the middle image is the logical anchor point.  Numerous feature detection algorithms are available; this example will use Oriented FAST and rotated BRIEF (ORB) features available as ``skimage.feature.ORB`` [Rub11]_.
 
 .. code-block:: python
 
+   import matplotlib.pyplot as plt
    from skimage.color import rgb2gray
    from skimage.feature import (ORB, match_descriptors,
                                 plot_matches)
@@ -112,9 +115,9 @@ In this series, the middle image is the logical anchor point.  Numerous feature 
 Transform estimation
 ********************
 
-To filter out the false matches observed in [FIGREF PRIOR], RANdom SAmple Consensus (RANSAC) is used [REFERENCE]. RANSAC is a powerful method of rejecting outliers available in `skimage.transform.ransac`. The transformation is estimated using an iterative process based on randomly chosen subsets, finally selecting the model which corresponds best with the majority of matches.
+To filter out the false matches observed in Figure :ref:`fig-pano1`, RANdom SAmple Consensus (RANSAC) is used [Fis81]_. RANSAC is a powerful method of rejecting outliers available in ``skimage.transform.ransac``. The transformation is estimated using an iterative process based on randomly chosen subsets, finally selecting the model which corresponds best with the majority of matches.
 
-It is important to note the randomness inherent to RANSAC. The results are robust, but will vary slightly every time.  Thus, it is expected that the readers' results will deviate slightly from the published figures after this point.
+It is important to note the randomness inherent to RANSAC. The results are robust, but will vary slightly every time.  Thus, it is expected that readers' results will deviate slightly from the published figures after this point.
 
 .. code-block:: python
 
@@ -144,10 +147,12 @@ It is important to note the randomness inherent to RANSAC. The results are robus
                 matches01[inliers01])
    ax.axis('off');
 
+The results of robust transform estimation with RANSAC are shown in Figure :ref:`fig-pano2`.
+
 .. figure:: pano2_ORB-RANSAC.png
    :align: center
 
-   The best RANSAC transform estimation uses only these keypoints. The outliers are now excluded (compare with :ref:`fig-pano1`). :label:`fig-pano2`
+   The best RANSAC transform estimation uses only these keypoints. The outliers are now excluded (compare with Figure :ref:`fig-pano1`). :label:`fig-pano2`
 
 Warp images into place
 **********************
@@ -191,12 +196,12 @@ Before producing the panorama, the correct size for a new canvas to hold all thr
        output_shape[::-1]).astype(int)
 
 
-Next, each image is warped and placed into a new canvas of shape `output_shape`.
+Next, each image is warped and placed into a new canvas of shape ``output_shape``.
 
 Translate middle target image
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The middle image is stationary, but still needs to be shifted into the center of the larger canvas.  This is done with simple translation.
+The middle image is stationary, but still needs to be shifted into the center of the larger canvas.  This is done with simple translation using a ``SimilarityTransform``.
 
 .. code-block:: python
 
@@ -218,7 +223,7 @@ The middle image is stationary, but still needs to be shifted into the center of
 Apply RANSAC-estimated transforms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The other two images are warped by `ProjectiveTransform` into place.
+The other two images are warped by ``ProjectiveTransform`` into place.
 
 .. code-block:: python
 
@@ -242,17 +247,18 @@ The other two images are warped by `ProjectiveTransform` into place.
    pano2_mask = (pano2_warped != -1)[..., 0]
    pano1_warped[~pano1_mask] = 0
 
+See the warped images in :ref:`fig-pano3`.
+
 .. figure:: pano3_warped.png
    :align: center
 
    Each image is now correctly warped into a new frame with room for the others, ready to be composited/stitched together. :label:`fig-pano3`
 
-Testing - need text at end of bottom level?
 
 Image stitching using minimum-cost path
 ***************************************
 
-Because of optical non-linearities, simply averaging these images together will not work. The overlapping areas become significantly blurred.  Instead, a minimum-cost path can be found with the assistance of `skimage.graph.route\_through\_array`. This function allows one to
+Because of optical non-linearities, simply averaging these images together will not work. The overlapping areas become significantly blurred.  Instead, a minimum-cost path can be found with the assistance of ``skimage.graph.route_through_array``. This function allows one to
 
 * start at any point on an array
 * find a particular path to any other point in the array
@@ -289,7 +295,7 @@ For optimal results, great care goes into the creation of the cost array.  The f
 4. Give a cost break to areas slightly further away, if the warped overlap is not parallel with the image edges, to ensure fair competition
 5. Put the absolute value of the *difference* of the overlapping images in place
 
-A convenience function `generate_costs` is provided in the Appendix (:ref:`cost-arr-func`) which accomplishes the above.
+A convenience function ``generate_costs`` is provided in the Appendix which accomplishes the above.
 
 .. code-block:: python
 
@@ -327,10 +333,11 @@ Once the cost function is generated, the minimum cost path can be found simply a
 .. figure:: pano4_mcp.png
    :align: center
    :figclass: w
+   :scale: 98%
 
    The minimum cost path in blue is the ideal stitching boundary. It stays as close to zero (mid-gray) as possible throughout its path.  The background is the cost array, with zero set to mid-gray for better visibility.  Note the subtle shading effect of cost reduction below the difference region.  Readers' paths may differ in appearance, but are optimal for their RANSAC-chosen transforms.
 
-Because `mask0` is a *final* mask for the left image, it needs to constrain the solution for the right image. This step is essential if there is large overlap such that the left and right images could theoretically occupy the same space.  It ensures the MCPs will not cross.
+Because ``mask0`` is a *final* mask for the left image, it needs to constrain the solution for the right image. This step is essential if there is large overlap such that the left and right images could theoretically occupy the same space.  It ensures the MCPs will not cross.
 
 .. code-block:: python
 
@@ -390,11 +397,11 @@ Most image formats can support an alpha channel as an optional fourth channel, w
    right_final = add_alpha(pano2_warped, mask2)
 
 
-Matplotlib's `imshow` supports alpha blending, but the default interpolation mode causes edge effects[Hunt07]_.  So as we create our final composite image, interpolation is disabled.
+Matplotlib's ``imshow`` supports alpha blending, but the default interpolation mode causes edge effects [Hunt07]_.  So as we create our final composite image, interpolation is disabled.
 
 .. code-block:: python
 
-   fig, ax = plt.subplots(figsize=(12, 12))
+   fig, ax = plt.subplots()
 
    # Turn off matplotlib's interpolation
    ax.imshow(left_final, interpolation='none')
@@ -408,6 +415,7 @@ Matplotlib's `imshow` supports alpha blending, but the default interpolation mod
 .. figure:: pano5_final.png
    :align: center
    :figclass: w
+   :scale: 31%
 
    The final, seamlessly stitched panorama.
 
@@ -421,6 +429,11 @@ References
            *ORB: an efficient alternative to SIFT or SURF*,
            IEEE International Conference on Computer Vision (ICCV),
            2564-2571, 2011. DOI:10.1109/ICCV.2011.6126544
+
+.. [Fis81] Fischler, M. A.; Robert C. B. *Random sample consensus:
+           a paradigm for model fitting with applications to image
+           analysis and automated cartography.* Communications of
+           the ACM, 24(6):381-395, 1981.
 
 
 Appendix
