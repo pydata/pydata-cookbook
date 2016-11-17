@@ -71,3 +71,44 @@ misinterpretations and creates a barrier to reproducibility. ``xarray`` keeps
 the data's labels (and possibly other metadata) together with the raw data
 itself for the duration of the workflow, from ingestion through processing to
 visualization.
+
+This chapter first introduces basic ``xarray`` usage, including the data model
+indexing operators, computation, and grouping operators.We then discuss how to
+load common data formats, with a focus on common problems and pitfalls. Finally,
+we have an in-depth example which demonstrates advanced usage.
+
+Basic Usage
+-----------
+
+The Data Model
+^^^^^^^^^^^^^^
+
+Do we just copy the xarray docs here? Is that even allowed by copyright?
+
+Indexing
+^^^^^^^^
+
+GroupBy: split-apply-combine
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+Reading and Writing Data
+------------------------
+
+Backends and Engines
+^^^^^^^^^^^^^^^^^^^^
+
+netCDF, HDF, RasterIO, OpenDAP
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Writing
+^^^^^^^
+
+We need to address compression, chunking, out-of-core!
+
+
+Advanced Example
+----------------
+
+Load a global surface temperature dataset. Remove seasonal cycle. Detrend.
+Apply EOF analysis. (Can we use ``apply``?)
