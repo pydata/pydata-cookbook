@@ -33,3 +33,41 @@ xarray: N-D labeled arrays and datasets in Python
 .. class:: keywords
 
    Data Analysis, Python, Pandas, dask, netCDF
+
+Introduction
+------------
+
+Many categories of data can be represented as multidimensional (i.e.
+N-dimensional) numeric arrays. One-dimensional data are produced by continuous
+point measurements, such as timeseries of temperature from a weather station.
+Two dimensional data is associated with images and is commonly produced via
+remote sensing (aircraft and satellites). Such data can be actual visible
+imagery or other fields such as surface temperature, soil moisture, elevation,
+etc. When two-dimensional image data is gathered over time, the resulting
+dataset becomes three-dimensional. Four dimensions are realized by earth system
+models, which simulate how a three-dimensional system evolves in time. Finally,
+arbitrary numbers of dimensions result when ensembles of data products are
+concatenated, compared, and synthesized in one analysis. (Our examples
+are mostly drawn from environmental sciences, where xarray was adopted early on,
+but many other fields will recognize parallels, including physics, astronomy,
+finance, and biomedical imaging.)
+
+The day-to-day work of scientists and researchers in many fields consists of
+organizing, analyzing, and visualizing N-dimensional array data. Within the
+python ecosystem, ``numpy`` and ``matplotlib`` have been the backbone of these
+workflows for more than a decade. ``xarray`` provides a layer on top of these
+tools which greatly simplifies and accelerates workflows, resulting in cleaner,
+more-readable code; more intuitive, data-aware syntax; and intelligent
+visualization. Furthermore, by integrating with ``dask`` (link to dask
+chapter?), ``xarray`` facilitates the analysis of very large datasets without
+forcing the user to learn specialized "big data" tools.
+
+A central concept behind ``xarray`` is the notion that *most data is labelled*.
+For example, a weather station might gather the variables ``temperature`` and
+``humidity`` over the dimension ``time``. These labels are part of the data's
+"metadata." It is unfortunately common practice in scientific data analysis to
+discard metadata during the data-processing phase. This can lead to bugs and
+misinterpretations and creates a barrier to reproducibility. ``xarray`` keeps
+the data's labels (and possibly other metadata) together with the raw data
+itself for the duration of the workflow, from ingestion through processing to
+visualization.
