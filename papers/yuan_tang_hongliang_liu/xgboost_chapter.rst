@@ -23,8 +23,8 @@ XGBoost: A Portable Distributed Gradient Boosting Library
    Gradient Boosting, Machine Learning, Predictive Analytics, Data Science
 
 
-.. include:: intro.txt
+.. include:: papers/yuan_tang_hongliang_liu/intro.txt
 
-.. include:: main_functionalities.txt
+.. include:: papers/yuan_tang_hongliang_liu/main_functionalities.txt
 
 
