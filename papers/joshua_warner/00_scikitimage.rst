@@ -25,7 +25,7 @@ scikit-image
 
 .. class:: abstract
 
-   scikit-image is an image processing library that implements algorithms and utilities for use in research, education and industry applications. It is released under the liberal Modified BSD open source license, provides a well-documented API in the Python programming language, and is developed by an active, international team of collaborators. In this chapter we highlight the advantages of open source to achieve the goals of  the scikit-image library, and we showcase several real-world image processing applications that use scikit-image. More information can be found on the project homepage, http://scikit-image.org.
+   ``scikit-image`` is an image processing library that implements algorithms and utilities for use in research, education and industry applications. It is released under the liberal Modified BSD open source license, provides a well-documented API in the Python programming language, and is developed by an active, international team of collaborators. In this chapter we highlight the advantages of open source to achieve the goals of  the scikit-image library, and we showcase several real-world image processing applications that use scikit-image. More information can be found on the project homepage, http://scikit-image.org.
 
 .. class:: keywords
 
@@ -34,11 +34,74 @@ scikit-image
 Introduction
 ------------
 
-scikit-image is an image processing library ...
+``scikit-image`` is an image processing library designed to complement and extend the capabilities of the core scientific Python libraries NumPy and SciPy for image processing applications [Van14]_.  Like other ``scikits``, it is domain-specific in scope and moves faster than the core libraries to meet users' evolving needs.
 
-Mention how ndarray allows us to fit in with rest of eco-system
+Images are NumPy arrays
+***********************
 
-Parallel & distributed processing via dask
+Images are simply a collection of data on a regular grid, represented by a NumPy array (see Figure :ref:`penguin`).  Thus, ``scikit-image`` shares the foundational data representation of the scientific Python ecosystem, allowing maximum compatibliity [Van11]_.
+
+Essentially all operations in ``scikit-image`` are defined for a two-dimensional images and, where possible, algorithms are generalized to work with arbitrary dimensionality.  Some images, like color images, may have more than one channel, e.g., red, green, and blue (RGB) with color information carried in an additional dimension.  In such cases, a ``multichannel=True`` keyword argument may need to be set.
+
+.. figure:: penguin.png
+   :align: center
+
+   This enlarged public domain image of Tux, the Linux kernel mascot, shows individual pixels.  The inset illustrates the luminance gray value at each underlying point. :label:`penguin`
+
+A note on image coordinates
+***************************
+
+It bears repeating that ``scikit-image`` shares NumPy conventions for array indexing.  When specifying points, one must use ``(row, column)`` indexing, not ``(x, y)`` coordinates.  For a two-dimensional image, the origin is in the upper left corner.  Figure :ref:`row-col` illustrates how indexing works in NumPy and ``scikit-image``.
+
+.. figure:: row-col.png
+   :align: center
+
+   Illustration of NumPy ``(row, column)`` indexing for a two-dimensional array or image.  Note the origin is in the upper left.
+
+
+TODO:  Parallel & distributed processing via dask
+*************************************************
+
+Package roadmap
+---------------
+
+Most of the functionality in ``scikit-image`` is located in *subpackages*, which group similar tools.  This is similar to how SciPy is designed [Oli07]_ [Jar11]_.  There is far more functionality in ``scikit-image`` than can be conveyed in a single chapter, so a brief overview of the subpackages included as of version 0.12.3 is included below.
+
+``color``
+    Color conversion routines, including grayscale to RGB (``rgb2gray``) and vice versa (``gray2rgb``) as well as many additional color spaces.
+``data``
+    Test images shipped with the package, including ``astronaut`` (see crop in Figure :ref:`astronaut`).
+``draw``
+    Routines to draw primitives including lines, shapes, and text.
+``exposure``
+    Intensity and contrast adjustments.
+``feature``
+    Feature detection, extraction, and matching. This subpackage includes ``ORB``, which is used in the panorama example to follow, as well as blob-finding and feature matching algorithms.
+``filters``
+    Whole-image changes like sharpening.  See also the rank filters exposed in ``skimage.filters.rank``.
+``future``
+    Similar to ``__future__``, this is a glimpse into the future of the package.  Contains merged functions which are ready for use, but with API that may not be finalized.
+``graph``
+    Graph theory, including path finding which is used in the panorama example to follow.
+``io``
+    Reading and writing images; multiple plugins supported.
+``measure``
+    Tools to quantify image properties such as length or shape.  Also includes ``marching_cubes``, ``marching_squares``, and Hough transforms to find lines, circles, or ellipses.
+``morphology``
+    Morphological operations, e.g., dilation and erosion. Binary and grayscale morphology supported.
+``novice``
+    Simplified teaching interface.
+``restoration``
+    Reduce noise or deconvolve images.
+``segmentation``
+    Partition an image into two or more regions.  Includes both unsupervised (``felzenszwalb``, ``slic``, ``quickshift``) and supervised (``random_walker``) methods.
+``transform``
+    Warp or rotate images.
+``util``
+    Common utility functions.
+``viewer``
+    QT-based interactive GUI.
+
 
 Reducing noise
 --------------
@@ -51,7 +114,7 @@ There are many types of noise which can affect images, and the first step to red
    :align: center
    :scale: 65%
 
-   Original, clean image and four different types of noise applied to it with ``skimage.util.random_noise``.  Poisson noise is subtle, but difficult to remove, whereas gaussian as well as salt & pepper are not subtle but also challenging.
+   Original, clean image and four different types of noise applied to it with ``skimage.util.random_noise``.  Poisson noise is subtle, but difficult to remove, whereas gaussian as well as salt & pepper are not subtle but also challenging. :label:`astronaut`
 
 It should come as no surprise that a particular denoising algorithm may be stronger or weaker at removing a particular kind of noise.  In this example the noise type is speckle noise, which is a kind of multiplicative noise often encountered in ultrasound medical imaging. Three different denoising algorithms implemented in scikit-image will be applied: total variation, bilateral, and wavelet denoising.
 
@@ -80,7 +143,7 @@ Total variation minimization
 
 Denoising by minimizing the total variation attempts to change the image in such a way as to reduce the total variation present.  Thus, if applied too strongly it will eliminate fine features of the original image along with noise.  The total variation norm being minimized is the L1 norm of the image gradient.  This is an excellent method to reduce salt-and-pepper noise.  As the norm being minimized is that of the gradient, when applied too strongly this algorithm results in very smooth results with no hard edges.
 
-There are two approaches to total variation denoising implemented in scikit-image: split-Bregman [Getreuer2012] and Chambolle [Chambolle2004]. In this example the latter is used.
+There are two approaches to total variation denoising implemented in scikit-image: split-Bregman [Get12]_ and Chambolle [Cha04]_. In this example the latter is used.
 
 .. code-block:: python
 
@@ -102,7 +165,7 @@ The results of total variation denoising via the Chambolle method are shown in t
 Bilateral filter
 ****************
 
-A bilateral filter [Tomasi1998] reduces noise while preserving edges. It assigns new values based on a local, weighted mean with two main features: proximity and similar value.  The bilateral filter is implemented by the function `denoise_bilateral`, contained in the module `restoration`.  This filter tends to produce piecewise-constant or cartoon-like images if applied to excess.
+A bilateral filter [Tom98]_ reduces noise while preserving edges. It assigns new values based on a local, weighted mean with two main features: proximity and similar value.  The bilateral filter is implemented by the function `denoise_bilateral`, contained in the module `restoration`.  This filter tends to produce piecewise-constant or cartoon-like images if applied to excess.
 
 .. code-block:: python
 
@@ -127,7 +190,7 @@ Wavelets [#]_are a fascinating mathematical construct that can be thought of as 
 
 .. [#] At time of writing, wavelet algorithms are only available in the devevelopment version of scikit-image.  They will be available in stable version of scikit-image 0.13 and above.
 
-Wavelets, when applied to 2-dimensional images, decompose the image into a representation made up of many individual wavelets.  This representation is sparse, i.e., there are relatively few wavelet coefficients with high values and many that are quite low.  Denoising simply sets a threshold below which small coefficients are discarded, then inverts the result yielding an image with less noise.  This same property is useful for image compression.
+Wavelets, when applied to 2-dimensional images, decompose the image into a representation made up of many individual wavelets.  This representation is sparse, i.e., there are relatively few wavelet coefficients with high values and many that are quite low.  Denoising simply sets a threshold below which small coefficients are discarded, then inverts the result yielding an image with less noise.  Sparse representations are similarly useful for image compression.
 
 .. code-block:: python
 
@@ -150,7 +213,7 @@ The results of wavelet denoising are shown in the fourth row of Figure :ref:`den
 Corner detection
 ----------------
 
-Corner detection is used to extract sharp features from an image. There are several corner detectors implemented on scikit-image. This example shows the Harris corner detector [Harris], which finds corner points and determine their position with sub-pixel precision.
+Corner detection is used to extract sharp features from an image. There are several corner detectors implemented on scikit-image. This example shows the Harris corner detector [Har88]_, which finds corner points and determine their position with sub-pixel precision.
 
 The input image will be based on an image of a checkerboard, given by the function ``data.checkerboard()``, but a rectangular checkerboard is too easy.  Using the functions ``warp`` and ``AffineTransform`` contained in in ``skimage.transform``, the checkerboard can be stretched and warped out of shape (see Figure :ref:`corners`)
 
@@ -270,16 +333,16 @@ It is important to note the randomness inherent to RANSAC. The results are robus
    from skimage.transform import ProjectiveTransform
 
    # Keypoints from left (src) to middle (dst) images
-   src = keypoints0[matches01[:, 0]][:, ::-1]
-   dst = keypoints1[matches01[:, 1]][:, ::-1]
+   src = keypoints[0][matches01[:, 0]][:, ::-1]
+   dst = keypoints[1][matches01[:, 1]][:, ::-1]
 
    model_ransac01, inliers01 = ransac(
        (src, dst), ProjectiveTransform, min_samples=4,
        residual_threshold=1, max_trials=300)
 
    # Keypoints from right (src) to middle (dst) images
-   src = keypoints2[matches12[:, 1]][:, ::-1]
-   dst = keypoints1[matches12[:, 0]][:, ::-1]
+   src = keypoints[2][matches12[:, 1]][:, ::-1]
+   dst = keypoints[1][matches12[:, 0]][:, ::-1]
 
    model_ransac12, inliers12 = ransac(
        (src, dst), ProjectiveTransform, min_samples=4,
@@ -301,9 +364,6 @@ The results of robust transform estimation with RANSAC are shown in Figure :ref:
 
 Warp images into place
 **********************
-
-Find appropriate canvas size
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Before producing the panorama, the correct size for a new canvas to hold all three warped images is needed.  The entire size, or extent, of this image is carefully found.
 
@@ -342,7 +402,7 @@ Before producing the panorama, the correct size for a new canvas to hold all thr
 Next, each image is warped and placed into a new canvas of shape ``output_shape``.
 
 Translate middle target image
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+*****************************
 
 The middle image is stationary, but still needs to be shifted into the center of the larger canvas.  This is done with simple translation using a ``SimilarityTransform``.
 
@@ -364,7 +424,7 @@ The middle image is stationary, but still needs to be shifted into the center of
 
 
 Apply RANSAC-estimated transforms
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+*********************************
 
 The other two images are warped by ``ProjectiveTransform`` into place.
 
@@ -410,7 +470,7 @@ Because of optical non-linearities, simply averaging these images together will 
 The array in this instance is a *cost array* which is carefully defined so the path found will be desired one, while the path itself is the *minimum-cost path*, or MCP. To use this technique we need starting and ending points, as well as a cost array.
 
 Define seed points
-^^^^^^^^^^^^^^^^^^
+******************
 
 .. code-block:: python
 
@@ -427,7 +487,7 @@ Define seed points
 
 
 Construct cost array
-^^^^^^^^^^^^^^^^^^^^
+********************
 :label:`construct-costs`
 
 For optimal results, great care goes into the creation of the cost array.  The function below is designed to construct the best possible cost array.  Its tasks are:
@@ -450,7 +510,7 @@ A convenience function ``generate_costs`` is provided in the Appendix which acco
 
 
 Find minimum-cost path and masks
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+********************************
 
 Once the cost function is generated, the minimum cost path can be found simply and efficiently.
 
@@ -469,9 +529,9 @@ Once the cost function is generated, the minimum cost path can be found simply a
    mask0 = np.zeros_like(pano0_warped[..., 0],
                          dtype=np.uint8)
    mask0[pts01[:, 0], pts01[:, 1]] = 1
-   mask0 = (
-     label(mask0, connectivity=1, background=-1) == 1)
 
+   # Fill left side using flood_fill (function in appendix)
+   flood_fill(mask0, (0, 0), 1)
 
 .. figure:: pano4_mcp.png
    :align: center
@@ -496,8 +556,10 @@ Because ``mask0`` is a *final* mask for the left image, it needs to constrain th
    # Final mask for right image
    mask2 = np.zeros_like(mask0, dtype=np.uint8)
    mask2[pts12[:, 0], pts12[:, 1]] = 1
-   mask2 = (
-     label(mask2, connectivity=1, background=-1) == 3)
+
+   # Fill right side of image
+   flood_fill(mask2, (mask2.shape[0] - 1,
+                      mask2.shape[1] - 1), 1)
 
    # Mask for middle image is one of exclusion
    mask1 = ~(mask0 | mask2).astype(bool)
@@ -562,11 +624,52 @@ Matplotlib's ``imshow`` supports alpha blending, but the default interpolation m
 
    The final, seamlessly stitched panorama.
 
+
+Final thoughts
+--------------
+Please cite the scikit-image paper [Van14]_ if you find ``scikit-image`` useful!  Citations allow developers to justify time invested in the package.
+
+The authors would like to acknowledge and thank every contributor to ``scikit-image``.
+
+
 References
 ----------
+.. [Van14] van der Walt, S.; Schönberger, J. L.; Nunez-Iglesias, J;
+           Boulogne, F; Warner, J. D.; Yager, N; Gouillart, E; Yu, T;
+           the scikit-image contributors. *scikit-image: image
+           processing in Python*, PeerJ, 2:e453, 2014.
+           DOI:10.7717/peerj.453
+
+.. [Oli07] Travis E. Oliphant. *Python for Scientific Computing.*
+           Computing in Science & Engineering, 9:10-20, 2007. DOI:10.1109/MCSE.2007.58
+
+.. [Jar11] Millman, K. J.; Aivazis, M. *Python for Scientists and
+           Engineers.* Computing in Science & Engineering, 13:9-12,
+           2011. DOI:10.1109/MCSE.2011.36
+
+.. [Van11] van der Walt, S.; Colbert, S. C.; Varoquaux, G. *The
+           NumPy Array: A Structure for Efficient Numerical
+           Computation.* Computing in Science & Engineering, 13:22-30,
+           2011. DOI:10.1109/MCSE.2011.37
+
 .. [Hunt07] Hunter, J. D. *Matplotlib: A 2D graphics environment*,
             Computing In Science & Engineering, 9(3):90-95, 2007.
             DOI:10.5281/zenodo.61948
+
+.. [Get12] Getreuer, P. *Rudin-Osher-Fatemi total variation
+           denoising using split Bregman.* Image Processing On Line,
+           2:74-95, 2012. DOI:10.5201/ipol.2012.g-tvd
+
+.. [Cha04] Chambolle, A. *An algorithm for total variation
+           minimization and applications.* Journal of Mathematical
+           imaging and vision, 20(1-2):89-97, 2004.
+           DOI: 10.1023/B:JMIV.0000011325.36760.1e
+
+.. [Har88] Harris, C.; Stephens, M. *A combined corner and edge
+           detector.* In Alvey vision conference 15:50, 1988.
+
+.. [Tom98] Tomasi, C.; Manduchi, R. *Bilateral filtering for gray
+           and color images.* IEEE Computer Vision, 1998. Sixth International Conference on, 839-846. 1998.
 
 .. [Rub11] Rublee, E.; Rabaud, V.; Konolige, K.; Bradski, G.
            *ORB: an efficient alternative to SIFT or SURF*,
@@ -591,10 +694,8 @@ Minimum-cost-path cost array creation
 This function generates an ideal cost array for panorama stitching, using the principles set forth in :ref:`construct-costs`.
 
 .. code-block:: python
-
-   from skimage.measure import label
-
-   def generate_costs(diff_image, mask, vertical=True,
+   def generate_costs(diff_image, mask,
+                      vertical=True,
                       gradient_cutoff=2.,
                       zero_edges=True):
      """
@@ -641,7 +742,15 @@ This function generates an ideal cost array for panorama stitching, using the pr
 
      # Label discrete regions
      cslice = slice(cmin, cmax + 1)
-     labels = label(mask[:, cslice], background=-1)
+     labels = mask[:, cslice].astype(np.uint8).copy()
+
+     # Fill top and bottom with unique labels
+     masked_pts = np.where(labels)
+     flood_fill(labels, (masked_pts[0][0],
+                         masked_pts[1][0]), 2)
+     flood_fill(labels, (0, labels.shape[0] // 2), 1)
+     flood_fill(labels, (labels.shape[0] - 1,
+                         labels.shape[1] // 2), 3)
 
      # Find distance from edge to region
      upper = (labels == 1).sum(axis=0)
@@ -666,9 +775,11 @@ This function generates an ideal cost array for panorama stitching, using the pr
      # Expand from 1d back to 2d
      vdis = mask.shape[0]
      costs_upper = (
-       costs_upper[np.newaxis, :].repeat(vdis, axis=0))
+       costs_upper[np.newaxis, :].repeat(
+         vdis, axis=0))
      costs_lower = (
-       costs_lower[np.newaxis, :].repeat(vdis, axis=0))
+       costs_lower[np.newaxis, :].repeat(
+         vdis, axis=0))
 
      # Place these in output array
      costs_arr[:, cslice] = costs_upper * (labels==1)
@@ -677,7 +788,7 @@ This function generates an ideal cost array for panorama stitching, using the pr
      # Finally, place the difference image
      costs_arr[mask] = np.abs(diff_image[mask])
 
-     if zero_edges is True:  # top & bottom rows = zero
+     if zero_edges is True:  # top & bottom rows = 0
        costs_arr[0, :] = 0
        costs_arr[-1, :] = 0
 
@@ -693,7 +804,7 @@ This Cython function is a basic flood fill algorithm which accepts an array and 
 The conceptual analogy of this algorithm is the "bucket" tool in many photo editing programs.
 
 .. code-block:: cython
-
+   import cython
    import numpy as np
    cimport numpy as cnp
 
