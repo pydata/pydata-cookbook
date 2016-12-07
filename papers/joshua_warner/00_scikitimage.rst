@@ -1,12 +1,7 @@
-:author: Stéfan van der Walt
-:email: stefanv@berkeley.edu
-:institution: Berkeley Institute for Data Science, University of California at Berkeley, USA
-:corresponding:
-
-:author: Emmanuelle Gouillart
-:email: emmanuelle.gouillart@nsup.org
-:institution: Joint Unit CNRS/Saint-Gobain Surface of Glass and Interfaces, Aubervilliers, France
-:equal-contributor:
+:author: Joshua D. Warner
+:email: joshua.dale.warner@gmail.com
+:institution: Mayo Clinic, Rochester, USA
+:first-author:
 
 :author: Alexandre F. de Siqueira
 :email: alexandredesiqueira@programandociencia.com
@@ -14,10 +9,16 @@
 :institution: TU Bergakademie Freiberg, Freiberg, Germany
 :equal-contributor:
 
-:author: Joshua D. Warner
-:email: joshua.dale.warner@gmail.com
-:institution: Mayo Clinic, Rochester, USA
+:author: Emmanuelle Gouillart
+:email: emmanuelle.gouillart@nsup.org
+:institution: Joint Unit CNRS/Saint-Gobain Surface of Glass and Interfaces, Aubervilliers, France
 :equal-contributor:
+
+:author: Stéfan van der Walt
+:email: stefanv@berkeley.edu
+:institution: Berkeley Institute for Data Science, University of California at Berkeley, USA
+:corresponding:
+
 
 ------------
 scikit-image
@@ -25,7 +26,7 @@ scikit-image
 
 .. class:: abstract
 
-   ``scikit-image`` is an image processing library that implements algorithms and utilities for use in research, education and industry applications. It is released under the liberal Modified BSD open source license, provides a well-documented API in the Python programming language, and is developed by an active, international team of collaborators. In this chapter we highlight the advantages of open source to achieve the goals of  the scikit-image library, and we showcase several real-world image processing applications that use scikit-image. More information can be found on the project homepage, http://scikit-image.org.
+   ``scikit-image`` is an image processing library that implements algorithms and utilities for use in research, education and industry applications. It is released under the liberal Modified BSD open source license, provides a well-documented API in the Python programming language, and is developed by an active, international team of collaborators. In this chapter we highlight the advantages of open source to achieve the goals of the ``scikit-image library``, and we showcase several real-world image processing applications that use ``scikit-image``. More information can be found on the project homepage, http://scikit-image.org.
 
 .. class:: keywords
 
@@ -56,7 +57,7 @@ It bears repeating that ``scikit-image`` shares NumPy conventions for array inde
 .. figure:: row-col.png
    :align: center
 
-   Illustration of NumPy ``(row, column)`` indexing for a two-dimensional array or image.  Note the origin is in the upper left.
+   Illustration of NumPy ``(row, column)`` indexing for a two-dimensional array or image.  Note the origin is in the upper left. :label:`row-col`
 
 
 TODO:  Parallel & distributed processing via dask
@@ -70,7 +71,7 @@ Most of the functionality in ``scikit-image`` is located in *subpackages*, which
 ``color``
     Color conversion routines, including grayscale to RGB (``rgb2gray``) and vice versa (``gray2rgb``) as well as many additional color spaces.
 ``data``
-    Test images shipped with the package, including ``astronaut`` (see crop in Figure :ref:`astronaut`).
+    Test images shipped with the package, including ``astronaut`` (see crop in Figure :ref:`noise-types`).
 ``draw``
     Routines to draw primitives including lines, shapes, and text.
 ``exposure``
@@ -80,7 +81,7 @@ Most of the functionality in ``scikit-image`` is located in *subpackages*, which
 ``filters``
     Whole-image changes like sharpening.  See also the rank filters exposed in ``skimage.filters.rank``.
 ``future``
-    Similar to ``__future__``, this is a glimpse into the future of the package.  Contains merged functions which are ready for use, but with API that may not be finalized.
+    Similar to Python's ability to import from the ``__future__``, this is a glimpse into the future of ``scikit-image``.  Contains stable functions which are ready for use, but with API that may not be finalized.
 ``graph``
     Graph theory, including path finding which is used in the panorama example to follow.
 ``io``
@@ -112,9 +113,9 @@ There are many types of noise which can affect images, and the first step to red
 
 .. figure:: noise_types.png
    :align: center
-   :scale: 65%
+   :scale: 90%
 
-   Original, clean image and four different types of noise applied to it with ``skimage.util.random_noise``.  Poisson noise is subtle, but difficult to remove, whereas gaussian as well as salt & pepper are not subtle but also challenging. :label:`astronaut`
+   Original, clean image and four different types of noise applied to it with ``skimage.util.random_noise``.  Poisson noise is subtle, but difficult to remove, whereas gaussian as well as salt & pepper are not subtle but also challenging. :label:`noise-types`
 
 It should come as no surprise that a particular denoising algorithm may be stronger or weaker at removing a particular kind of noise.  In this example the noise type is speckle noise, which is a kind of multiplicative noise often encountered in ultrasound medical imaging. Three different denoising algorithms implemented in scikit-image will be applied: total variation, bilateral, and wavelet denoising.
 
@@ -131,7 +132,7 @@ The act of denoising is always a balance.  It is almost never possible to entire
    sigma = 0.3
    noisy = random_noise(img_astro, var=sigma**2)
 
-The ``noisy`` image generated here and seen in Figure :ref:`fig-denoise` is what our approaches below will attempt to fix.  Denoising algorithms are located in ``skimage.restoration``, prefixed with ``denoise_``.
+The ``noisy`` image generated here and seen in Figure :ref:`denoise` is what our approaches below will attempt to fix.  Denoising algorithms are located in ``skimage.restoration``, prefixed with ``denoise_``.
 
 .. figure:: denoise.png
    :align: center
@@ -186,7 +187,7 @@ The results of bilateral filter denoising are shown in the third row of Figure :
 Wavelet denoising
 *****************
 
-Wavelets [#]_are a fascinating mathematical construct that can be thought of as a way to combine the best of frequency and time domain analysis.  They are applied at multiple scales.  For brevity, the most important feature of wavelets for denoising purposes is that of *sparsity*.
+Wavelets [#]_ are a fascinating mathematical construct that can be thought of as a way to combine the best of frequency and time domain analysis.  They are applied at multiple scales.  For brevity, the most important feature of wavelets for denoising purposes is that of *sparsity*.
 
 .. [#] At time of writing, wavelet algorithms are only available in the devevelopment version of scikit-image.  They will be available in stable version of scikit-image 0.13 and above.
 
@@ -229,9 +230,10 @@ The input image will be based on an image of a checkerboard, given by the functi
                 output_shape=(200, 310))
 
 Then we use three functions from ``skimage.feature``:
-* ``corner_harris`` compute the Harris corner measure response image.
+
+* ``corner_harris`` computes the Harris corner measure response image.
 * ``corner_peaks`` identifies corners in a corner measure response image, like the one returned by ``corner_harris``.
-* ``corner_subpix`` determine the sub-pixel position of corners.
+* ``corner_subpix`` determines the sub-pixel position of corners.
 
 .. code-block:: python
 
@@ -408,9 +410,11 @@ The middle image is stationary, but still needs to be shifted into the center of
 
 .. code-block:: python
 
-   from skimage.transform import warp, SimilarityTransform
+   from skimage.transform import warp
+   from skimage.transform import SimilarityTransform
 
-   offset1 = SimilarityTransform(translation= -corner_min)
+   offset1 = SimilarityTransform(
+       translation= -corner_min)
 
    # Translate pano1 into place
    pano1_warped = warp(
@@ -530,7 +534,7 @@ Once the cost function is generated, the minimum cost path can be found simply a
                          dtype=np.uint8)
    mask0[pts01[:, 0], pts01[:, 1]] = 1
 
-   # Fill left side using flood_fill (function in appendix)
+   # Fill left side with flood_fill (in appendix)
    flood_fill(mask0, (0, 0), 1)
 
 .. figure:: pano4_mcp.png
@@ -694,6 +698,7 @@ Minimum-cost-path cost array creation
 This function generates an ideal cost array for panorama stitching, using the principles set forth in :ref:`construct-costs`.
 
 .. code-block:: python
+
    def generate_costs(diff_image, mask,
                       vertical=True,
                       gradient_cutoff=2.,
@@ -804,6 +809,7 @@ This Cython function is a basic flood fill algorithm which accepts an array and 
 The conceptual analogy of this algorithm is the "bucket" tool in many photo editing programs.
 
 .. code-block:: cython
+
    import cython
    import numpy as np
    cimport numpy as cnp
