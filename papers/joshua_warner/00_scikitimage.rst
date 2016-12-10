@@ -24,9 +24,19 @@
 scikit-image
 ------------
 
-.. class:: abstract
+3.. class:: abstract
 
-   ``scikit-image`` is an image processing library that implements algorithms and utilities for use in research, education and industry applications. It is released under the liberal Modified BSD open source license, provides a well-documented API in the Python programming language, and is developed by an active, international team of collaborators. In this chapter we highlight the advantages of open source to achieve the goals of the ``scikit-image library``, and we showcase several real-world image processing applications that use ``scikit-image``. More information can be found on the project homepage, http://scikit-image.org.
+   ``scikit-image`` is an image processing library that implements
+   algorithms and utilities for use in research, education and
+   industry applications. It is released under the liberal Modified
+   BSD open source license, provides a well-documented API in the
+   Python programming language, and is developed by an active,
+   international team of collaborators. In this chapter we highlight
+   the advantages of open source to achieve the goals of the
+   ``scikit-image library``, and we showcase a few real-world image
+   processing applications that uses ``scikit-image`` extensively. More
+   information can be found on the project homepage,
+   http://scikit-image.org.
 
 .. class:: keywords
 
@@ -42,7 +52,14 @@ Images are NumPy arrays
 
 Images are simply a collection of data on a regular grid, represented by a NumPy array (see Figure :ref:`penguin`).  Thus, ``scikit-image`` shares the foundational data representation of the scientific Python ecosystem, allowing maximum compatibliity [Van11]_.
 
-Essentially all operations in ``scikit-image`` are defined for a two-dimensional images and, where possible, algorithms are generalized to work with arbitrary dimensionality.  Some images, like color images, may have more than one channel, e.g., red, green, and blue (RGB) with color information carried in an additional dimension.  In such cases, a ``multichannel=True`` keyword argument may need to be set.
+Essentially all operations in ``scikit-image`` are defined for at
+least two-dimensional images and, where possible, are generalized to
+work with images of arbitrary dimensionality.  Some images, like color
+images, may have more than one channel, e.g., red, green, and blue
+(RGB).  Such an image is represented as an `(M, N, c)` array, with
+color information carried in the third dimension.  To disambiguate
+color images from, e.g., 3-D volume data (a 3-D array with shape `(plane,
+rows, cols)`), certain operations support a `multichannel` flag.
 
 .. figure:: penguin.png
    :align: center
@@ -52,7 +69,14 @@ Essentially all operations in ``scikit-image`` are defined for a two-dimensional
 A note on image coordinates
 ***************************
 
-It bears repeating that ``scikit-image`` shares NumPy conventions for array indexing.  When specifying points, one must use ``(row, column)`` indexing, not ``(x, y)`` coordinates.  For a two-dimensional image, the origin is in the upper left corner.  Figure :ref:`row-col` illustrates how indexing works in NumPy and ``scikit-image``.
+It bears repeating that ``scikit-image`` shares NumPy conventions for
+array indexing.  When specifying points, one must use ``(row,
+column)`` indexing, not ``(x, y)`` coordinates.  For a two-dimensional
+image, the origin is in the upper left corner.  Figure :ref:`row-col`
+illustrates how indexing works in NumPy and ``scikit-image``.  Please refer to the `scikit-image user guide
+<http://scikit-image.org/docs/stable/user_guide/numpy_images.html#coordinate-conventions>`_
+for more detail.
+
 
 .. figure:: row-col.png
    :align: center
@@ -60,13 +84,48 @@ It bears repeating that ``scikit-image`` shares NumPy conventions for array inde
    Illustration of NumPy ``(row, column)`` indexing for a two-dimensional array or image.  Note the origin is in the upper left. :label:`row-col`
 
 
-TODO:  Parallel & distributed processing via dask
-*************************************************
+Parallel & distributed processing via dask
+******************************************
+
+``scikit-image`` has very basic parallel processing support through
+`skimage.util.apply_parallel(function, image)`.  The aim of
+`apply_parallel` is to make use of all processors on a single machine,
+by dividing the image into blocks and applying the specified function
+to each.  To handle edge effects, the blocks can have some overlap,
+with the central part of each processed block being used to construct
+the output.
+
+This approach addresses the most basic use-case, but for anything more
+challenging we recommend the `dask` and `distributed` libraries.  We
+now follow along with a parallel processing image processing example
+by the author of the above-mentioned libraries, Matthew Rocklin.
+
+.. From: https://gist.github.com/mrocklin/611c64e4fb62486269b507a872984cc5
+
+.. Matthew writes:
+
+.. Email from last night from colleague at the NIH:
+
+.. Electron microscopy is probably generating the biggest ndarray
+.. datasets in the field - terabytes regularly. Neuroscience need EM to
+.. see connections between neurons because the critical features of
+.. neural synapses (connections) are below the diffraction limit of light
+.. microscopes. The hard part is machine vision on the data to follow
+.. small neuron parts from one slice to the next. This type of research
+.. has been called "connectomics".
+
+.. This data is from drosophila: http://emdata.janelia.org/
+
+.. Here is an example 2d slice of the data. If you take the below URL and change the last number you can get about 5000 different images. http://emdata.janelia.org/api/node/bf1/grayscale/raw/xy/2000_2000/1800_2300_5000
+
+.. The data is a bit sparse (many black pixels) but it's around a 25GB dataset if you pull down all the slices. And it's a 3d ndarray.*
+
+.. note:: TODO: Reduce the notebook at the above mentioned URL into a concise example.
 
 Package roadmap
 ---------------
 
-Most of the functionality in ``scikit-image`` is located in *subpackages*, which group similar tools.  This is similar to how SciPy is designed [Oli07]_ [Jar11]_.  There is far more functionality in ``scikit-image`` than can be conveyed in a single chapter, so a brief overview of the subpackages included as of version 0.12.3 is included below.
+Most of the functionality in ``scikit-image`` is located in *subpackages*, which group similar tools.  This is similar to how SciPy is designed [Oli07]_ [Jar11]_.  There is far more functionality in ``scikit-image`` than can be conveyed in a single chapter, so a brief overview of the subpackages included as of version 0.12 is included below.
 
 ``color``
     Color conversion routines, including grayscale to RGB (``rgb2gray``) and vice versa (``gray2rgb``) as well as many additional color spaces.
