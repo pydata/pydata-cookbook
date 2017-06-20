@@ -2,3 +2,4 @@ output
 _build
 *.pyc
 *~
+papers/maxwell_margenot/.ipynb_checkpoints
