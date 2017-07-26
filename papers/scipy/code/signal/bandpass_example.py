@@ -15,14 +15,14 @@ plt.figure(figsize=(4.0, 4.0))
 # First plot the desired ideal response as a green(ish) rectangle.
 rect = plt.Rectangle((lowcut, 0), highcut - lowcut, 1.0,
                      facecolor="#60ff60",
-                     #facecolor="b",
                      edgecolor='k',
                      alpha=0.15)
 plt.gca().add_patch(rect)
 for order in [3, 6, 12]:
     sos = butter_bandpass(lowcut, highcut, fs, order)
     w, h = sosfreqz(sos, worN=2000)
-    plt.plot((fs * 0.5 / np.pi) * w, abs(h), 'k', alpha=(order+1)/13, label="order = %d" % order)
+    plt.plot((fs*0.5/np.pi)*w, abs(h), 'k',
+             alpha=(order+1)/13, label="order = %d" % order)
 
 plt.plot([0, 0.5 * fs], [np.sqrt(0.5), np.sqrt(0.5)],
          'k--', alpha=0.6, linewidth=1, label=r'$\sqrt{2}/2$')
@@ -31,8 +31,9 @@ plt.xlabel('Frequency (Hz)')
 plt.ylabel('Gain')
 plt.grid(alpha=0.5)
 plt.legend(framealpha=1, shadow=True, loc='best')
-plt.title("Amplitude response for\nButterworth bandpass filters\n"
-          "lowcut = %g Hz, highcut = %g Hz" % (lowcut, highcut))
+plt.title("Amplitude response for\nButterworth bandpass filters")
+plt.text(430, 0.07, "lowcut: %4g Hz\nhighcut: %4g Hz" % (lowcut, highcut),
+         fontsize=8)
 plt.tight_layout()
 plt.savefig("bandpass_example_response.pdf")
 
