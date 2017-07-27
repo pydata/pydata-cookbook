@@ -334,7 +334,6 @@ scaling the values to the units expected by ``scipy.signal.butter``.
 
 
 .. code-block:: python
-   :linenos:
 
     from scipy.signal import butter, sosfiltfilt
 
@@ -435,7 +434,6 @@ bandpass filter.  We have 0.03 seconds of data sampled at
 below 400 Hz or above 1200 Hz.
 
 .. code-block:: python
-   :linenos:
 
     from scipy.signal import butter, sosfilt
 
@@ -454,10 +452,19 @@ below 400 Hz or above 1200 Hz.
         y = sosfilt(sos, data)
         return y
 
-First, we'll take a look at the frequency reponse of the Butterworth
+First, we'll take a look at the frequency response of the Butterworth
 bandpass filter with order 3, 6, and 12.  The code that generates
 Figure :ref:`fig-bandpass-example-response` demonstrates the use of
-``scipy.signal.sosfreqz``.
+``scipy.signal.sosfreqz``:
+
+.. code-block:: python
+
+    for order in [3, 6, 12]:
+        sos = butter_bandpass(lowcut, highcut, fs, order)
+        w, h = sosfreqz(sos, worN=2000)
+        plt.plot((fs*0.5/np.pi)*w, abs(h), 'k',
+                 alpha=(order+1)/13,
+                 label="order = %d" % order)
 
 .. figure:: figs/bandpass_example_response.pdf
 
@@ -467,7 +474,15 @@ Figure :ref:`fig-bandpass-example-response` demonstrates the use of
 
 Figure :ref:`fig-bandpass-example-signals` shows the input signal and
 the filtered signal.  The order 12 bandpass Butterworth filter
-was used.
+was used.  The plot shows the input signal `x`; the filtered signal
+was generated with
+
+.. code-block:: python
+
+    y = butter_bandpass_filt(x, lowcut, highcut, fs,
+                             order=12)
+
+where ``fs = 4800``, ``lowcut = 400`` and ``highcut = 1200``.
 
 .. figure:: figs/bandpass_example_signals.pdf
 
@@ -491,7 +506,6 @@ is stored in ``y``.  The array ``sos`` contains the filter
 in SOS format, and is presumed to have already been created.
  
 .. code-block:: python
-   :linenos:
 
     batch_size = N  # Number of samples per batch
 
