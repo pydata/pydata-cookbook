@@ -9,5 +9,7 @@ y = lfilter(b, a, x)
 
 plt.figure(figsize=(4.0, 2.0))
 plt.plot(y)
+plt.xlabel('Sample number')
+plt.grid(alpha=0.25)
 plt.tight_layout()
 plt.savefig('unstable_butterworth.pdf')

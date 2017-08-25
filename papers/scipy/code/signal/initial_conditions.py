@@ -29,6 +29,7 @@ plt.legend(framealpha=1, shadow=True)
 plt.grid(alpha=0.25)
 plt.xlabel('t')
 plt.title('Filter with different '
-          'initial conditions')
+          'initial conditions',
+          fontsize=10)
 plt.tight_layout()
 plt.savefig("initial_conditions.pdf")
