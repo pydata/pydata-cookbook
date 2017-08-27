@@ -1536,7 +1536,7 @@ and :math:`\beta` is 4.990.
 
 Finally, we use ``firwin`` to compute the filter coefficients::
 
-    taps = firwin(N, cutoff/(0.5*fs),
+    taps = firwin(numtaps, cutoff/(0.5*fs),
                   window=('kaiser', beta), scale=False)
 
 The results of the Kaiser method applied to our lowpass filter design
