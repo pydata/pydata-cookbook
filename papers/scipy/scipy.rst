@@ -1667,17 +1667,6 @@ accept 89 taps as the optimum.
     :label:`fig-opt-lowpass`
 
 
-Resampling [Drop this section?]
-===============================
-
-In this section, we discuss upsampling, downsampling and resampling
-a discrete time signal using tools in SciPy.
-
-* ``scipy.signal.decimate``
-* ``scipy.signal.resample``
-* ``scipy.signal.resample_poly``
-* ``scipy.signal.upfirdn``
-
 References
 ==========
 .. [Bellanger]
