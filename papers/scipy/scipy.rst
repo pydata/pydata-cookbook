@@ -757,9 +757,9 @@ FIR filters in ``scipy.signal``
     R = (N - 1)//2  for a Type I filter
     L               number of frequencies in the grid used in the
                     linear programming method
-    g_k             Alternative representation of a Type I filter;
-                        g_0 = b_0
-                        g_k = 2*b_k, 1 <= k <= R
+    p_k             Alternative representation of a Type I filter;
+                        p_0 = b_0
+                        p_k = 2*b_k, 1 <= k <= R
 
 A finite impulse response filter is basically a weighted moving
 average.  Given an input sequence :math:`{x_{_n}}` and the :math:`M+1`
