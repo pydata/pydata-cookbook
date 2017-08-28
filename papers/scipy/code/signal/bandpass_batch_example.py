@@ -1,7 +1,9 @@
+from __future__ import division, print_function
+
 import numpy as np
-from scipy.signal import sosfreqz, butter, sosfilt
+from scipy.signal import sosfilt
 import matplotlib.pyplot as plt
-from butter import butter_bandpass, butter_bandpass_filt
+from butter import butter_bandpass
 from make_data import make_data
 
 
@@ -38,11 +40,11 @@ start = 0
 alpha = 0.5
 while start < len(x):
     stop = min(start + batch_size, len(x))
-    if start == 0 or start == batch_size:
-        lbl = 'Filtered signal'
+    if start == batch_size:
+        label = 'Filtered signal'
     else:
-        lbl = None
-    plt.plot(t[start:stop+1], y[start:stop+1], 'C0', alpha=alpha, label=lbl)
+        label = None
+    plt.plot(t[start:stop+1], y[start:stop+1], 'C0', alpha=alpha, label=label)
     alpha = 1.5 - alpha
     start = stop
 

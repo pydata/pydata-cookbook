@@ -1,4 +1,7 @@
+from __future__ import division, print_function
+
 import numpy as np
+
 
 def make_data(T, fs):
     nsamples = int(T * fs)

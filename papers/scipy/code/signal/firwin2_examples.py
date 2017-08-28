@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
+from __future__ import division, print_function
+
 import numpy as np
-from scipy.signal import firwin2, firls, freqz, kaiser_atten, kaiser_beta, remez
+from scipy.signal import (firwin2, firls, freqz, kaiser_atten, kaiser_beta,
+                          remez)
 import matplotlib.pyplot as plt
 
 
@@ -24,7 +28,6 @@ rbands = [0, 48, 59, 61, 72, 150, 175, 1000]
 rdes   = [    1,    0.1,       1,         0]
 rwt    = [    3,      1,       3,         1]
 taps_r = remez(numtaps, rbands, rdes, Hz=fs)
-#taps_rw = remez(numtaps, rbands, rdes, weight=rwt, Hz=fs)
 
 w_none, h_none = freqz(taps_none, 1, worN=2000)
 w_fw, h_fw = freqz(taps_fw, 1, worN=2000)
@@ -47,6 +50,4 @@ plt.text(9, .08, "%d taps" % numtaps, fontsize=9)
 plt.title('Filters designed with the window method', fontsize=10)
 plt.tight_layout()
 
-plt.savefig("firwin2_examples.pdf", dpi=600)
-
-plt.show()
+plt.savefig("firwin2_examples.pdf")

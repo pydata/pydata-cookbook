@@ -1,8 +1,8 @@
+from __future__ import division, print_function
 
 import numpy as np
 from scipy.signal import remez, freqz
 import matplotlib.pyplot as plt
-
 
 
 fs = 2000
@@ -25,12 +25,6 @@ for numtaps in [31, 47]:
     w2 *= 0.5*fs/np.pi
 
     plt.figure(figsize=(4.0, 3.0))
-    #for band, des in zip(np.array(bands).reshape(-1, 2), desired):
-    #    if band[0] == 0:
-    #        label = 'desired'
-    #    else:
-    #        label = None
-    #    plt.plot(band, [des]*2, 'g', alpha=0.2, linewidth=2.5, label=label)
 
     plt.plot(w, np.abs(h), linewidth=1, label='(a)')
     plt.plot(w2, np.abs(h2), linewidth=1, label='(b)')
@@ -56,5 +50,3 @@ for numtaps in [31, 47]:
     plt.tight_layout()
 
     plt.savefig("remez_example_%dtaps.pdf" % numtaps)
-
-plt.show()

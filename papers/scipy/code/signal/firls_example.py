@@ -1,3 +1,4 @@
+from __future__ import division, print_function
 
 import numpy as np
 from scipy.signal import firls, freqz
@@ -28,11 +29,8 @@ plt.figure(figsize=(4.0, 4.5))
 
 plt.subplot(3, 1, 1)
 
-#label = 'desired'
-label = None
 for band, des in zip(bands.reshape(-1, 2), desired.reshape(-1, 2)):
-    plt.plot(band, des, 'k', alpha=0.1, linewidth=4, label=label)
-    label=None
+    plt.plot(band, des, 'k', alpha=0.1, linewidth=4)
 plt.plot(w1, np.abs(h1), alpha=0.9, label='uniform weight')
 plt.plot(w2, np.abs(h2), alpha=0.9, label='weight:%s' % (wts,))
 
@@ -83,5 +81,4 @@ plt.ylabel('Gain')
 plt.xlabel('Frequency (Hz)')
 
 plt.tight_layout()
-#plt.show()
 plt.savefig('firls_example.pdf')

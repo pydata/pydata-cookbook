@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import division, print_function
 
 import numpy as np
 from scipy.signal import kaiserord, firwin, freqz
@@ -75,11 +77,6 @@ plt.ylim(-1.8*stop_db, 10)
 plt.ylabel('Gain (dB)')
 plt.title('Kaiser Window Filter Design', fontsize=10)
 
-#           'Inputs: width %g Hz, stop band rejection %.1f dB  '
-#           '(δ = %g)\n'
-#           'Kaiser design: N = %d, $\\beta$ = %.3f') %
-#          (width, stop_db, delta, len(taps), beta),
-
 plt.grid(alpha=0.25)
 
 plt.subplot(3, 1, 2)
@@ -111,5 +108,4 @@ plt.grid(alpha=0.25)
 plt.xlabel('Frequency (Hz)')
 plt.tight_layout()
 
-#plt.show()
 plt.savefig('kaiser_lowpass_filter_design.pdf')

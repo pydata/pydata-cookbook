@@ -1,5 +1,7 @@
+from __future__ import division, print_function
+
 import numpy as np
-from scipy.signal import sosfreqz, butter, sosfilt
+from scipy.signal import sosfreqz
 import matplotlib.pyplot as plt
 from butter import butter_bandpass, butter_bandpass_filt
 from make_data import make_data

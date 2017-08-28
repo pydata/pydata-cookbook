@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import division, print_function
 
 import numpy as np
-from scipy.fftpack import next_fast_len
 from scipy.signal import remez, freqz
 import matplotlib.pyplot as plt
 
@@ -17,7 +19,7 @@ def bellanger_estimate(deltap, deltas, width, fs):
 def remez_lowpass(deltap, deltas, cutoff, width, fs):
 
     numtaps = bellanger_estimate(deltap, deltas, width, fs)
-    numtaps |= 1  # Ensure an odd number of taps.
+    numtaps |= 1  # Bitwise OR with 1 to ensure an odd number of taps.
     trans_lo = cutoff - 0.5*width
     trans_hi = cutoff + 0.5*width
     taps = remez(numtaps,
@@ -48,9 +50,8 @@ print("Stop band rejection: %g (%.3g dB)" % (deltas, -20*np.log10(deltas),))
 
 taps = remez_lowpass(deltap, deltas, cutoff, width, fs)
 
-#---------------------------------------
+#----------------------------------------
 # Plot the frequency response...
-
 
 upper_ripple_db = 20*np.log10(1 + deltap)
 lower_ripple_db = 20*np.log10(1 - deltap)
@@ -80,14 +81,15 @@ plt.subplot(3, 1, 1)
 
 plt.plot(w, 20*np.log10(np.abs(h)))
 
-plt.plot([0, cutoff_lower_trans], [upper_ripple_db, upper_ripple_db], 'r', alpha=0.4)
-plt.plot([0, cutoff_lower_trans], [lower_ripple_db, lower_ripple_db], 'r', alpha=0.4)
+plt.plot([0, cutoff_lower_trans], [upper_ripple_db, upper_ripple_db], 'r',
+         alpha=0.4)
+plt.plot([0, cutoff_lower_trans], [lower_ripple_db, lower_ripple_db], 'r',
+         alpha=0.4)
 
 plt.plot([cutoff_upper_trans, 0.5*fs], [-stop_db, -stop_db], 'r', alpha=0.4)
 
 plt.axvline(cutoff_lower_trans, color='k', alpha=0.4, linewidth=1)
 plt.axvline(cutoff_upper_trans, color='k', alpha=0.4, linewidth=1)
-#plt.axvline(cutoff, color='c', alpha=0.25, linewidth=1)
 
 widthstr = '%g Hz' % width
 if cutoff < 0.25*fs:
@@ -126,7 +128,6 @@ plt.plot([cutoff_upper_trans, 0.5*fs], [deltas, deltas], 'r', alpha=0.4)
 
 plt.axvline(cutoff_lower_trans, color='k', alpha=0.4, linewidth=1)
 plt.axvline(cutoff_upper_trans, color='k', alpha=0.4, linewidth=1)
-#plt.axvline(cutoff, color='c', alpha=0.25, linewidth=1)
 
 plt.xlim(0, (cutoff + 0.6*width))
 plt.ylim(1 - 1.6*deltap, 1 + 1.6*deltap)
@@ -135,19 +136,19 @@ plt.ylabel('Gain')
 
 plt.grid(alpha=0.25)
 
-
 plt.subplot(3, 1, 3)
 desired = w < cutoff
 deviation = np.abs(np.abs(h) - desired)
 deviation[(w >= cutoff-0.5*width) & (w <= cutoff + 0.5*width)] = np.nan
 plt.plot(w, deviation)
-plt.plot([0, cutoff - 0.5*width], [deltap, deltap], 'r', linewidth=1, alpha=0.4)
-plt.plot([cutoff + 0.5*width, 0.5*fs], [deltas, deltas], 'r', linewidth=1, alpha=0.4)
+plt.plot([0, cutoff - 0.5*width], [deltap, deltap], 'r',
+         linewidth=1, alpha=0.4)
+plt.plot([cutoff + 0.5*width, 0.5*fs], [deltas, deltas], 'r',
+         linewidth=1, alpha=0.4)
 plt.ylabel('|A(ω) - D(ω)|')
 plt.grid(alpha=0.25)
 
 plt.xlabel('Frequency (Hz)')
 
 plt.tight_layout()
-#plt.show()
 plt.savefig("opt_lowpass.pdf")

@@ -2,8 +2,8 @@ from __future__ import division, print_function
 
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import sosfiltfilt, spectrogram
-from butter import butter_lowpass, butter_lowpass_filtfilt
+from scipy.signal import spectrogram
+from butter import butter_lowpass_filtfilt
 
 
 time, pressure = np.loadtxt('pressure.dat', skiprows=2,
@@ -17,15 +17,18 @@ fs = 50000
 nperseg = 80
 noverlap = nperseg - 4
 
-print("Spectrogram window length: %g ms (%d samples)" % (1000*nperseg/fs, nperseg))
+print("Spectrogram window length: %g ms (%d samples)" %
+      (1000*nperseg/fs, nperseg))
 
-f, t, spec = spectrogram(pressure, fs=fs, nperseg=nperseg, noverlap=noverlap, window='hann')
+f, t, spec = spectrogram(pressure, fs=fs, nperseg=nperseg, noverlap=noverlap,
+                         window='hann')
 t += t0/1000
 
 cutoff = 1250
 pressure_filtered = butter_lowpass_filtfilt(pressure, cutoff, fs, order=8)
 
-f, t, filteredspec = spectrogram(pressure_filtered, fs=fs, nperseg=nperseg, noverlap=noverlap, window='hann')
+f, t, filteredspec = spectrogram(pressure_filtered, fs=fs, nperseg=nperseg,
+                                 noverlap=noverlap, window='hann')
 t += t0/1000
 
 tlo = t[0]*1000

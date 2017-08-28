@@ -30,6 +30,7 @@ def solve_linprog(c, A_ub=None, b_ub=None, A_eq=None, b_eq=None, tol=None):
         warnings.simplefilter('error')
         linprog_warning = None
         try:
+            # Note: the interior point method was added in scipy 1.0.0.
             result = linprog(c, A_ub, b_ub, A_eq=A_eq, b_eq=b_eq,
                              bounds=(None, None),
                              method='interior-point',
@@ -45,7 +46,8 @@ def solve_linprog(c, A_ub=None, b_ub=None, A_eq=None, b_eq=None, tol=None):
         raise RuntimeError('linprog failed: %s' % (result.message,))
 
     # Convert the solution to the linear programming problem to
-    # the FIR filter coefficients.
+    # the FIR filter coefficients.  If p is, for example, [a, b, c, d],
+    # then taps = 0.5*[d, c, b, 2*a, b, c, d].
     p = result.x[:-1]
     taps = 0.5*np.concatenate((p[:0:-1], [2*p[0]], p[1:]))
     return taps
@@ -81,7 +83,7 @@ def firlp_lowpass1(numtaps, deltap, deltas, cutoff, width, fs, tol=None):
                               np.zeros_like(wsgrid)))
 
     R = (numtaps - 1)//2
-    C = np.cos(wgrid[:, np.newaxis]*np.arange(R+1))
+    C = np.cos(wgrid[:, np.newaxis] * np.arange(R+1))
     V = 1/weights[:, np.newaxis]
 
     A = np.block([[C, -V], [-C, -V]])
@@ -154,5 +156,5 @@ plt.xlabel('Frequency (radians/sample)')
 plt.ylabel('Gain')
 plt.title('Pass band detail', fontsize=10)
 plt.tight_layout()
-#plt.show()
+
 plt.savefig('firlp_lowpass_example.pdf')

@@ -1,3 +1,5 @@
+from __future__ import division, print_function
+
 from scipy.signal import butter, sosfilt, sosfiltfilt
 
 
@@ -14,6 +16,7 @@ def butter_lowpass_filtfilt(data, cutoff, fs,
     y = sosfiltfilt(sos, data)
     return y
 
+
 def butter_bandpass(lowcut, highcut, fs, order):
     nyq = 0.5 * fs
     low = lowcut / nyq
@@ -21,6 +24,7 @@ def butter_bandpass(lowcut, highcut, fs, order):
     sos = butter(order, [low, high], btype='band',
                  output='sos')
     return sos
+
 
 def butter_bandpass_filt(data, lowcut, highcut, fs,
                          order):
