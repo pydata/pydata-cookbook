@@ -1176,25 +1176,13 @@ are intervals with unspecified desired behavior.
    :label:`fig-remez-example-47taps`
 
 In some cases, the exchange algorithm implemented in ``remez`` can fail
-to converge.  This can happen, for example, when the transition between
-bands or the bands themselves are too small.  Failure is more likely when
-the number of taps is large (i.e. greater than 1000).  When the algorithm
-fails to converge, ``remez`` raises an exception, so the failure can be
-detected.  When this happens, one can try increasing the `maxiter` argument,
-to allow the algorithm more iterations before it gives up, and one can
-try increasing `grid_density` to increase the resolution of the grid
-on which the algorithm seeks the maximum of response errors.
-
-Occasionally ``remez`` fails in a way that does not result in a Python
-exception.  When ``remez`` completes, it is expect that frequency response
-is nearly "equiripple" in each band.  That is, the heights of the lobes
-in each band are all the same.  However, with orders greater than
-2000 it has been observed that ``remez`` can return a lowpass filter in
-which the final lobe (at the end of the stop band) is nearly twice the height
-of the other lobes.
-We repeat the recommendation: always check the frequency
-response of a filter designed with ``remez``.
-
+to converge.  Failure is more likely when the number of taps is large
+(i.e. greater than 1000).  It can also happen that ``remez`` converges,
+but the result does not have the expected equiripple behavior in
+each band.  When a problem occurs, one can try increasing the ``maxiter``
+argument, to allow the algorithm more iterations before it gives up, and
+one can try increasing ``grid_density`` to increase the resolution of the
+grid on which the algorithm seeks the maximum of the response errors.
 
 FIR filter design: linear programming
 -------------------------------------
