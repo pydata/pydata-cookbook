@@ -842,10 +842,11 @@ filter coefficients.
 FIR filter frequency response
 -----------------------------
 
-The function ``scipy.signal.freqz`` computes the frequency
-response of a FIR filter (and, more generally, an IIR filter represented
-by the coefficients of the numerator and denominator of the transfer
-function).
+The function ``scipy.signal.freqz`` computes the frequency response of a
+linear filter represented as a transfer function.  This class of filters
+includes FIR filters, where the representation of the numerator of the
+transfer function is the array of taps and the denominator is the scalar
+:math:`a_{_0} = 1`.
 
 As an example, we'll compute the frequency response of a uniformly
 weighted moving average. For a moving average of length :math:`n`,
