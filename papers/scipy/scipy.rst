@@ -398,7 +398,7 @@ Figure :ref:`fig-pressure-example-filtered`.
 The spectrograms in Figures :ref:`fig-pressure-example-input`
 and :ref:`fig-pressure-example-filtered` were created using ``spectrogram``
 from ``scipy.signal`` and ``pcolormesh`` from ``matplotlib.pyplot``.
-The function ``spectrogram`` has a several options that control how
+The function ``spectrogram`` has several options that control how
 the spectrogram is computed.  It is quite flexible, but obtaining a plot
 that effectively illustrates the time-varying spectrum of a signal might
 require exploring the possible parameters.  In keeping with the "cookbook"
@@ -548,7 +548,7 @@ below 400 Hz or above 1200 Hz.
 Just like we did for the lowpass filter, we define two functions that
 allow us to create and apply a Butterworth bandpass filter with the
 frequencies given in Hz (or any other units).  The functions take care
-of scaling the values to the normalized range expected by the SciPy function
+of scaling the values to the normalized range expected by
 ``scipy.signal.butter``.
 
 .. code-block:: python
