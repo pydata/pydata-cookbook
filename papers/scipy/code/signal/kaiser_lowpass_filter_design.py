@@ -102,7 +102,7 @@ deviation = np.abs(np.abs(h) - desired)
 deviation[(w >= cutoff-0.5*width) & (w <= cutoff + 0.5*width)] = np.nan
 plt.plot(w, deviation)
 plt.plot([0, 0.5*fs], [deltas, deltas], 'r', linewidth=1, alpha=0.4)
-plt.ylabel('|A(ω) - D(ω)|')
+plt.ylabel(u'|A(ω) - D(ω)|')
 plt.grid(alpha=0.25)
 
 plt.xlabel('Frequency (Hz)')
