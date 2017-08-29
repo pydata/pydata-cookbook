@@ -876,42 +876,87 @@ to dimensional units by multiplying by :math:`\frac{f_s}{2\pi}`.
 FIR filter design
 -----------------
 
-We'll discuess how SciPy can be used to design a FIR filter using
+We'll demonstrate how SciPy can be used to design a FIR filter using
 the following four methods.
 
 * *The window method.*
+  The filter is designed by computing the impulse response of
+  the desired ideal filter and then multiplying the coefficients
+  by a window function.
 
-  Two functions implement the window method (see, for example,
-  Oppenheim and Schafer [OS]_, Ch. 7.5):
+* *Least squares design.*  The weighted integral of the squared
+  frequency response error is minimized.
 
-  * ``scipy.signal.firwin``
-  * ``scipy.signal.firwin2``
+* *Parks-McClellan equiripple design.*  A "minimax" method, in which the
+  maximum deviation from the desired response is minimized.
 
-  We'll show an example of ``firwin2`` in the following section,
-  and we'll use ``firwin`` in when we discuss the Kaiser window method.
-
-* *Least squares design.*
-
-  The function ``scipy.signal.firls`` computes the "least squares" filter
-  [explain the meaning...].
-
-* *Parks-McClellan equiripple design.*
-
-  ``scipy.signal.remez``
-
-* *Linear programming.*  The design problem can be formulated as a
-  linear programming problem.  We'll see how the function ``linprog``
-  from ``scipy.optimize`` can be used to solve the problem.
+* *Linear programming.*  The "minimax" design problem can be formulated as
+  a linear programming problem.
 
 In the following sections, we discuss each design method.
 
 FIR filter design: the window method
 ------------------------------------
 
-[TODO] The window method...
+The window method for designing a FIR filter is to compute the filter
+coefficients as the impulse response of the desired ideal filter, and then
+multiply the coefficents by a window function to both truncate the set of
+coefficients (thus making a *finite* impulse response filter) and to shape
+the actual filter response.  Most textbooks on digital signal processing
+include a discussion of the method; see, for example, Section 7.5 of
+Oppenheim and Schafer [OS]_.
 
-Figure :ref:`fig-firwin2-examples` show the result of designing
-a filter using several windows.
+Two functions in the module ``scipy.signal`` implement the window
+method, ``firwin`` and ``firwin2``.
+Here we'll show an example of ``firwin2``.
+We'll use ``firwin`` when we discuss the Kaiser window method.
+
+We'll design a filter with 185 taps for a signal that is sampled at 2000 Hz.
+The filter is to be lowpass, with a *linear* transition from the pass
+band to the stop band over the range 150 Hz to 175 Hz.  We also want
+a notch in the pass band between 48 Hz and 72 Hz, with sloping sides,
+centered at 60 Hz where the desired gain is 0.1.  The dashed line in
+Figure :ref:`fig-firwin2-examples` shows the desired frequency response.
+
+To use ``firwin2``, we specify the desired response at the endpoints
+of a piecewise linear profile defined over the frequency range [0, 1000]
+(1000 Hz is the Nyquist frequency).
+
+.. code:: python
+
+    freqs = [0, 48,  60, 72, 150, 175, 1000]
+    gains = [1,  1, 0.1,  1,   1,   0,    0]
+
+To illustrate the affect of the window on the filter, we'll demonstrate
+the design using three different windows: the Hamming window,
+the Kaiser window with parameter :math:`\beta` set to 2.70,
+and the rectangular or "boxcar" window (i.e. simple truncation without
+tapering).
+
+.. figure:: figs/firwin2_examples_windows.pdf
+
+    Window functions used in the ``firwin2`` filter design example.
+
+The code to generate the FIR filters is
+
+.. code-block:: python
+
+    fs = 2000
+    numtaps = 185
+
+    # window=None is equivalent to using the
+    # rectangular window.
+    taps_none = firwin2(numtaps, freqs, gains,
+                        nyq=0.5*fs, window=None)
+    # The default window is Hamming.
+    taps_h = firwin2(numtaps, freqs, gains,
+                     nyq=0.5*fs)
+    beta = 2.70
+    taps_k = firwin2(numtaps, freqs, gains,
+                     nyq=0.5*fs, window=('kaiser', beta))
+
+Figure :ref:`fig-firwin2-examples` shows the frequency
+response of the three filters.
 
 .. figure:: figs/firwin2_examples.pdf
 
