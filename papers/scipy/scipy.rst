@@ -52,12 +52,6 @@ Introduction
 
 [TO DO...]
 
-Related projects
-----------------
-
-* ``statsmodels.tsa``: Time series analysis module in ``statsmodels``
-* others...
-
 There are two main classes of linear filters: *finite impulse response* (FIR)
 filters, and *infinite impulse response* (IIR) filters. 
 In the following two sections, we will discuss many of the functions
