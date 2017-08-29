@@ -41,7 +41,7 @@ width = 30.0
 deltap = 0.005
 deltas = 0.002
 
-print("Pass band:  1 ± %g ([%.3g, %.3g] dB)" %
+print(u"Pass band:  1 ± %g ([%.3g, %.3g] dB)" %
       (deltap, 20*np.log10(1 - deltap), 20*np.log10(1 + deltap)))
 print("Stop band rejection: %g (%.3g dB)" % (deltas, -20*np.log10(deltas),))
 
