@@ -940,6 +940,7 @@ tapering).
 .. figure:: figs/firwin2_examples_windows.pdf
 
     Window functions used in the ``firwin2`` filter design example.
+    :label:`fig-firwin2-examples-windows`
 
 The code to generate the FIR filters is
 
@@ -1493,19 +1494,29 @@ The maximum width of the transition from the pass band to stop band is
 :math:`\Delta \omega`, and the cutoff frequency :math:`\omega_c` is
 centered in the transition band.
 
-In this section and the next, we'll consider the following filter
+In the next two sections, we'll consider the following filter
 design problem.  We need a lowpass filter for a signal that is
 sampled at 1000 Hz.  The desired cutoff frequency is 180 Hz, and the
 transition from the pass band to the stop band must not exceed
 30 Hz.  In the pass band, the gain of the filter should deviate
 from 1 by no more than 0.005 (i.e. worst case ripple is 0.5%).
 In the stop band, the gain must be less than 0.002 (about 54 dB attenuation).
-In this section, we'll tackle the design using the
-Kaiser window method, and in the next we'll obtain an optimal design
+In the next section, we'll tackle the design using the
+Kaiser window method.  After that, we'll obtain an optimal design
 by using the Parks-McClellan method.
 
-Kaiser [Kaiser66]_ [Kaiser74]_ [... TODO ...].
-This method is also described in Sections 7.5.3 and 7.6 of the text by
+Kaiser's window method
+----------------------
+
+The Kaiser window is a window function with a parameter :math:`\beta`
+that controls the shape of the function.  An example of a Kaiser window
+is plotted in Figure :ref:`fig-firwin2-examples-windows`.
+Kaiser [Kaiser66]_ [Kaiser74]_ developed formulas that, for a given
+transition width :math:`\Delta \omega` and error tolerance for
+the frequency response,
+determine the order :math:`M` and the parameter :math:`\beta` required
+to meet the requirements.  Summaries of the method can be found in
+many sources, including Sections 7.5.3 and 7.6 of the text by
 Oppenheim and Schafer [OS]_.
 
 In Kaiser's method, there is only one parameter that controls the passband
@@ -1518,13 +1529,8 @@ One can interpret the argument ``ripple`` as the maximum deviation
 :math:`A(\omega)` is the magnitude of the actual frequency response
 of the filter and :math:`D(\omega)` is the desired frequency response.
 (That is, in the pass band, :math:`D(\omega) = 1`, and in the stop band,
-:math:`D(\omega) = 0`.) In the script below, :math:`|A(\omega) - D(\omega)|`
-is plotted in the third plot.
-
-Kaiser developed an expression for :math:`\beta` (the Kaiser window parameter)
-that depends on the stop band rejection, and also a formula for the filter
-order in terms of the stop band rejection and :math:`\Delta\omega`, where
-:math:`\Delta\omega` is the transition width between the pass and stop bands.
+:math:`D(\omega) = 0`.) In Figure :ref:`fig-kaiser-lowpass-filter-design`,
+the bottom plot shows :math:`|A(\omega) - D(\omega)|`.
 
 The Kaiser window design method, then, is to determine the length of the
 filter and the Kaiser window parameter :math:`\beta` using Kaiser's formula
