@@ -1263,7 +1263,7 @@ algebra, the problem can be written as
 To implement this as a linear programming problem, we use a suitably dense
 grid of :math:`L` frequencies
 :math:`{\omega_{_0}, \omega_{_1}, \ldots, \omega_{_{L-1}}}`
-(not necessarily uniformaly spaced).
+(not necessarily uniformly spaced).
 We define the
 :math:`L \times (R+1)` matrix :math:`C` as
 
