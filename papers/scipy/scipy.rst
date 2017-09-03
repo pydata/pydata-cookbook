@@ -773,17 +773,30 @@ output :math:`{y_{_n}}` is computed as discrete convolution of
 .. math::
    :label: eq-fir-filter
 
-   y_{_n} = \sum_{i=0}^{M} b_{_i}x_{_{n-i}}
+   y_{_n} = \sum_{i=0}^{M} b_{_i}x_{_{n-i}} = (b * x)_{_n}
 
+where :math:`*` is the convolution operator.
 :math:`M` is the *order* of the filter; a filter with order :math:`M`
 has :math:`M + 1` coefficients.  It is common to say that the filter has
 :math:`M + 1` *taps*.
 
-Apply a FIR filter: convolution
--------------------------------
+Apply a FIR filter
+------------------
 
 To apply a FIR filter to a signal, we use one of the convolution functions
-available in NumPy or SciPy, such as ``scipy.signal.convolve``.  For example,
+available in NumPy or SciPy, such as ``scipy.signal.convolve``.
+For a signal :math:`\{x_{_0}, x_{_1}, \ldots, x_{_{S-1}}\}` of finite length
+:math:`S`, Eq. (:ref:`eq-fir-filter`)
+doesn't specify how to compute the result for :math:`n < M`.
+The convolution functions in NumPy and SciPy have an option called
+``mode`` for specifying how to handle this.  For example, ``mode='valid'``
+only computes output values for which all the values of :math:`x_{_i}`
+in Eq. :ref:`eq-fir-filter` are defined, and ``mode='same'`` in effect
+pads the input array :math:`x` with zeros so that the output is the
+same length as the input.  See the docstring of ``numpy.convolve``
+or ``scipy.signal.convolve`` for more details.
+
+For example,
 
 .. code-block:: python
 
@@ -795,8 +808,8 @@ available in NumPy or SciPy, such as ``scipy.signal.convolve``.  For example,
     # taps is the array of FIR filter coefficients.
     taps = np.array([ 0.0625,  0.25  ,  0.375 ,
                       0.25  ,  0.0625])
-    # Filtered signal.
-    y = convolve(x, taps)
+    # Filtered signal. y has the same length as x.
+    y = convolve(x, taps, mode='same')
 
 There are also convolution functions in ``scipy.ndimage``.
 The function ``scipy.ndimage.convolve1d`` provides an ``axis`` argument,
@@ -813,15 +826,8 @@ to be filtered with one call.  For example,
     # Apply the filter along the last dimension.
     y = convolve1d(x, taps, axis=-1)
 
-**Edge effects/boundary conditions.**
-
-[TODO: Expand these comments on edge effects.]
-
-If one applies a FIR filter with
-one of the convolution functions, how to handle the edges
-must be decided.  Options include using the ``mode`` argument
-of the convolution function, or simply discarding values near
-the edge.
+Note that ``scipy.ndimage.convolve1d`` has a different set of options
+for its ``mode`` argument.  Consult the docstring for details.
 
 Specialized functions that are FIR filters
 ------------------------------------------
