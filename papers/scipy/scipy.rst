@@ -904,6 +904,14 @@ the following four methods.
   a linear programming problem.
 
 In the following sections, we discuss each design method.
+For this discussion, we define the following functions,
+where :math:`\omega` is the frequency in radians per sample:
+:math:`A(\omega)`, the filter's (real, signed) frequency response;
+:math:`D(\omega)`, the desired frequency response of the filter; and
+:math:`W(\omega)`, the weight assigned to the response error at
+:math:`\omega` (i.e. how "important" is the error
+:math:`A(\omega) - D(\omega)`).
+
 
 FIR filter design: the window method
 ------------------------------------
@@ -988,14 +996,9 @@ The weighted least squares method creates a filter for which the expression
 
    \int_{0}^{\pi} W(\omega) \left(A(\omega) - D(\omega)\right)^{2} \, d\omega
 
-is minimized, where :math:`\omega` is the frequency expressed in
-radians per sample, :math:`A(\omega)` is the actual amplitude response
-of the filter, and :math:`D(\omega)` is the desired magnitude
-of the frequency response.  :math:`W(\omega)` is the weight applied to
-the error at :math:`\omega`.
-
+is minimized.
 The function ``scipy.signal.firls`` implements this method for piecewise
-linear idealized response :math:`D(\omega)` and piecewise constant weight
+linear desired response :math:`D(\omega)` and piecewise constant weight
 function :math:`W(\omega)`.  Three arguments (one optional) define the shape
 of the desired response: ``bands``, ``desired`` and (optionally) ``weights``.
 
@@ -1018,27 +1021,19 @@ The filter is a lowpass filter, with pass band [0, 15] and stop band
 [30, 100], and we want the gain to vary linearly from 1 down to 0 in the
 transition band [15, 30].  We'll design a FIR filter with 43 taps.
 
-Here's how we'll start the code:
+We create the arrays ``bands`` and ``desired`` as described above:
+
+.. code-block:: python
+
+    bands =   np.array([0, 15, 15, 30, 30, 100])
+    desired = np.array([1,  1,  1,  0,  0,   0])
+
+Then we call ``firls``:
 
 .. code-block:: python
 
     numtaps = 43
-    fs = 200
-    f1 = 15
-    f2 = 30
-
-Next we create the arrays ``bands`` and ``desired`` as described above:
-
-.. code-block:: python
-
-    bands =   np.array([0, f1, f1, f2, f2, 0.5*fs])
-    desired = np.array([1,  1,  1,  0,  0,      0])
-
-Now we can call ``firls``:
-
-.. code-block:: python
-
-    taps1 = firls(numtaps, bands, desired, nyq=0.5*fs)
+    taps1 = firls(numtaps, bands, desired, nyq=100)
 
 The frequency response of this filter is the blue curve in
 Figure :ref:`fig-firls-example`.
@@ -1057,7 +1052,7 @@ least weight to the transition band:
 .. code-block:: python
 
     wts = [100, .01, 1]
-    taps2 = firls(numtaps, bands, desired, nyq=0.5*fs,
+    taps2 = firls(numtaps, bands, desired, nyq=100,
                   weight=wts)
 
 The frequency response of this filter is the orange curve in
@@ -1084,7 +1079,7 @@ the stop band is also improved.
     This subsection is just an observation; we could delete it.
 
 When uniform weights are used, and the desired result is specified
-for the complete interval :math:`[0, \omega_{_N}]`, the least squares
+for the complete interval :math:`[0, \pi]`, the least squares
 method is equivalent to the window method with no window function
 (i.e. the window is the "boxcar" function).
 To verify this numerically, it is necessary to use a sufficiently
@@ -1114,7 +1109,18 @@ FIR filter design: Parks-McClellan
 ----------------------------------
 
 The Parks-McClellan algorithm [PM]_ is based on the Remez exchange
-algorithm [RemezAlg]_.  We won't give a detailed description here; most
+algorithm [RemezAlg]_.  This is a "minimax" optimization; that is,
+it miminizes the maximum value of :math:`|E(\omega)|` over
+:math:`0 \le \omega \le \pi`, where
+:math:`E(\omega)` is the (weighted) deviation of the actual frequency
+response from the desired frequency response:
+
+.. math::
+   :label: eq-weighted-error-omega
+
+   E(\omega) = W(\omega)(A(\omega) - D(\omega)),  \quad 0 \le \omega \le \pi,
+
+We won't give a detailed description of the algorithm here; most
 texts on digital signal processing explain the algorithm (e.g. Section
 7.7 of Oppenheim and Schafer [OS]_). The method is implemented in ``scipy.signal``
 by the function ``remez``.
@@ -1204,24 +1210,12 @@ review the linear programming formulation, and then we discuss
 the implementation.
 
 **Formulating the design problem as a linear program.**
-This description follows the explanation in Ivan Selesnick's lecture
+Like the Parks-McClellan method, this approach is a "minimax"
+optimization of Eq. (:ref:`eq-weighted-error-omega`).
+Our description follows the explanation in Ivan Selesnick's lecture
 notes [Selesnick]_.  This formulation is for a Type I filter (that is,
 an odd number of taps with even symmetry), but
 the same ideas can be applied to other FIR filter types.
-
-Define the weighted error
-
-.. math::
-   :label: eq-weighted-error-omega
-
-   E(\omega) = W(\omega)(A(\omega) - D(\omega)),  \quad 0 \le \omega \le \pi,
-
-where :math:`\omega` is the frequency in radians per sample,
-:math:`A(\omega)` is the filter's (real, signed) frequency response,
-:math:`D(\omega)` is the desired frequency response, and
-:math:`W(\omega)` is the weight assigned to the error at :math:`\omega`.
-:math:`D(\omega)` and :math:`W(\omega)` are design inputs that
-are independent of the filter coefficients.
 
 For convenience, we'll consider the FIR filter coefficients for
 a filter of length :math:`2R + 1` using *centered* indexing:
@@ -1241,8 +1235,8 @@ per sample.  The frequency response can be written
 
 where we define :math:`p_{_0} = b_{_0}` and,
 for :math:`1 \le i \le R`, :math:`p_{_i} = 2b_{_i}`.
-We've used the even symmetry of the cosine function and the filter coefficients
-(:math:`b_{_{-i}} = b_{_i}`).
+We've used the even symmetry of the cosine function and the of filter coefficients
+about the middle coefficient (:math:`b_{_{-i}} = b_{_i}`).
 
 The "minimax" problem is to minimize the maximum error.  That is,
 choose the filter coefficients such that
@@ -1326,12 +1320,12 @@ than in ``remez``.
 
 The advantage of the linear programming method is its ability to
 easily handle additional constraints.  Any constraint, either equality
-or inequality, that be written as a linear constraint can be added
+or inequality, that can be written as a linear constraint can be added
 to the problem.
 
-We will demonstrate how to implement a lowpass filter design
-using linear programming with the constraint that :math:`H(0) = 1`.
-This requirement is
+We will demonstrate how to implement a lowpass filter design using linear
+programming with the constraint that the gain for a constant input is
+exactly 1.  That is,
 
 .. math::
 
@@ -1397,8 +1391,8 @@ We create the array of weights on the grid with
         (np.full_like(wpgrid, fill_value=wtpass),
          np.full_like(wsgrid, fill_value=wtstop)))
 
-The desired values are 1 in the pass band and 0 in the stop
-band.  Evaluated on the grid, we have
+The desired values of the frequency response are 1 in the pass band and 0
+in the stop band.  Evaluated on the grid, we have
 
 .. code-block:: python
 
@@ -1432,7 +1426,7 @@ that are actually passed to ``linprog``:
     c[-1] = 1
 
 In code, the arrays for the equality constraint needed to
-define :math:`H(0) = 1` are:
+define :math:`A(0) = 1` are:
 
 .. code-block:: python
 
@@ -1477,7 +1471,7 @@ used ``wtpass = 2`` and ``wtstop = 1``.
 .. figure:: figs/firlp_lowpass_example.pdf
 
    Result of solving a lowpass FIR filter design problem by linear
-   programming with the constraint :math:`H(0) = 1`.
+   programming with the constraint :math:`A(0) = 1`.
    The response without the extra constraint, solved using ``remez``,
    is also plotted.
 
