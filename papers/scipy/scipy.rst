@@ -1350,7 +1350,7 @@ to design a lowpass filter with a pass band of :math:`[0, \omega_p]`
 and a stop band of :math:`[\omega_s, \pi]`, where the frequencies
 :math:`\omega_p` and :math:`\omega_s` are expressed in radians per
 sample, and :math:`0 < \omega_p < \omega_s < \pi`.  We'll also
-impose the constraint that :math:`H(0) = 1`.
+impose the constraint that :math:`A(0) = 1`.
 
 A choice for the density of the frequency samples on :math:`[0, \pi]`
 that works well is :math:`16N`, where :math:`N` is the number of taps
@@ -1370,7 +1370,7 @@ The grids of frequencies on the pass and stop bands are then
     wpgrid = np.linspace(0, wp, numfreqs_pass)
     wsgrid = np.linspace(ws, np.pi, numfreqs_stop)
 
-We will impose an equality constraint on :math:`H(0)`, so we can can
+We will impose an equality constraint on :math:`A(0)`, so we can can
 remove that frequency from ``wpgrid``--there is no point in requiring
 both the equality and inequality constraints at :math:`\omega = 0`.
 Then ``wpgrid`` and ``wsgrid`` are concatenated to form ``wgrid``,
