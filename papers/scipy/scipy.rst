@@ -773,17 +773,30 @@ output :math:`{y_{_n}}` is computed as discrete convolution of
 .. math::
    :label: eq-fir-filter
 
-   y_{_n} = \sum_{i=0}^{M} b_{_i}x_{_{n-i}}
+   y_{_n} = \sum_{i=0}^{M} b_{_i}x_{_{n-i}} = (b * x)_{_n}
 
+where :math:`*` is the convolution operator.
 :math:`M` is the *order* of the filter; a filter with order :math:`M`
 has :math:`M + 1` coefficients.  It is common to say that the filter has
 :math:`M + 1` *taps*.
 
-Apply a FIR filter: convolution
--------------------------------
+Apply a FIR filter
+------------------
 
 To apply a FIR filter to a signal, we use one of the convolution functions
-available in NumPy or SciPy, such as ``scipy.signal.convolve``.  For example,
+available in NumPy or SciPy, such as ``scipy.signal.convolve``.
+For a signal :math:`\{x_{_0}, x_{_1}, \ldots, x_{_{S-1}}\}` of finite length
+:math:`S`, Eq. (:ref:`eq-fir-filter`)
+doesn't specify how to compute the result for :math:`n < M`.
+The convolution functions in NumPy and SciPy have an option called
+``mode`` for specifying how to handle this.  For example, ``mode='valid'``
+only computes output values for which all the values of :math:`x_{_i}`
+in Eq. :ref:`eq-fir-filter` are defined, and ``mode='same'`` in effect
+pads the input array :math:`x` with zeros so that the output is the
+same length as the input.  See the docstring of ``numpy.convolve``
+or ``scipy.signal.convolve`` for more details.
+
+For example,
 
 .. code-block:: python
 
@@ -795,8 +808,8 @@ available in NumPy or SciPy, such as ``scipy.signal.convolve``.  For example,
     # taps is the array of FIR filter coefficients.
     taps = np.array([ 0.0625,  0.25  ,  0.375 ,
                       0.25  ,  0.0625])
-    # Filtered signal.
-    y = convolve(x, taps)
+    # Filtered signal. y has the same length as x.
+    y = convolve(x, taps, mode='same')
 
 There are also convolution functions in ``scipy.ndimage``.
 The function ``scipy.ndimage.convolve1d`` provides an ``axis`` argument,
@@ -813,15 +826,8 @@ to be filtered with one call.  For example,
     # Apply the filter along the last dimension.
     y = convolve1d(x, taps, axis=-1)
 
-**Edge effects/boundary conditions.**
-
-[TODO: Expand these comments on edge effects.]
-
-If one applies a FIR filter with
-one of the convolution functions, how to handle the edges
-must be decided.  Options include using the ``mode`` argument
-of the convolution function, or simply discarding values near
-the edge.
+Note that ``scipy.ndimage.convolve1d`` has a different set of options
+for its ``mode`` argument.  Consult the docstring for details.
 
 Specialized functions that are FIR filters
 ------------------------------------------
@@ -898,6 +904,14 @@ the following four methods.
   a linear programming problem.
 
 In the following sections, we discuss each design method.
+For this discussion, we define the following functions,
+where :math:`\omega` is the frequency in radians per sample:
+:math:`A(\omega)`, the filter's (real, signed) frequency response;
+:math:`D(\omega)`, the desired frequency response of the filter; and
+:math:`W(\omega)`, the weight assigned to the response error at
+:math:`\omega` (i.e. how "important" is the error
+:math:`A(\omega) - D(\omega)`).
+
 
 FIR filter design: the window method
 ------------------------------------
@@ -940,6 +954,7 @@ tapering).
 .. figure:: figs/firwin2_examples_windows.pdf
 
     Window functions used in the ``firwin2`` filter design example.
+    :label:`fig-firwin2-examples-windows`
 
 The code to generate the FIR filters is
 
@@ -981,14 +996,9 @@ The weighted least squares method creates a filter for which the expression
 
    \int_{0}^{\pi} W(\omega) \left(A(\omega) - D(\omega)\right)^{2} \, d\omega
 
-is minimized, where :math:`\omega` is the frequency expressed in
-radians per sample, :math:`A(\omega)` is the actual amplitude response
-of the filter, and :math:`D(\omega)` is the desired magnitude
-of the frequency response.  :math:`W(\omega)` is the weight applied to
-the error at :math:`\omega`.
-
+is minimized.
 The function ``scipy.signal.firls`` implements this method for piecewise
-linear idealized response :math:`D(\omega)` and piecewise constant weight
+linear desired response :math:`D(\omega)` and piecewise constant weight
 function :math:`W(\omega)`.  Three arguments (one optional) define the shape
 of the desired response: ``bands``, ``desired`` and (optionally) ``weights``.
 
@@ -1011,27 +1021,19 @@ The filter is a lowpass filter, with pass band [0, 15] and stop band
 [30, 100], and we want the gain to vary linearly from 1 down to 0 in the
 transition band [15, 30].  We'll design a FIR filter with 43 taps.
 
-Here's how we'll start the code:
+We create the arrays ``bands`` and ``desired`` as described above:
+
+.. code-block:: python
+
+    bands =   np.array([0, 15, 15, 30, 30, 100])
+    desired = np.array([1,  1,  1,  0,  0,   0])
+
+Then we call ``firls``:
 
 .. code-block:: python
 
     numtaps = 43
-    fs = 200
-    f1 = 15
-    f2 = 30
-
-Next we create the arrays ``bands`` and ``desired`` as described above:
-
-.. code-block:: python
-
-    bands =   np.array([0, f1, f1, f2, f2, 0.5*fs])
-    desired = np.array([1,  1,  1,  0,  0,      0])
-
-Now we can call ``firls``:
-
-.. code-block:: python
-
-    taps1 = firls(numtaps, bands, desired, nyq=0.5*fs)
+    taps1 = firls(numtaps, bands, desired, nyq=100)
 
 The frequency response of this filter is the blue curve in
 Figure :ref:`fig-firls-example`.
@@ -1050,7 +1052,7 @@ least weight to the transition band:
 .. code-block:: python
 
     wts = [100, .01, 1]
-    taps2 = firls(numtaps, bands, desired, nyq=0.5*fs,
+    taps2 = firls(numtaps, bands, desired, nyq=100,
                   weight=wts)
 
 The frequency response of this filter is the orange curve in
@@ -1077,7 +1079,7 @@ the stop band is also improved.
     This subsection is just an observation; we could delete it.
 
 When uniform weights are used, and the desired result is specified
-for the complete interval :math:`[0, \omega_{_N}]`, the least squares
+for the complete interval :math:`[0, \pi]`, the least squares
 method is equivalent to the window method with no window function
 (i.e. the window is the "boxcar" function).
 To verify this numerically, it is necessary to use a sufficiently
@@ -1107,7 +1109,18 @@ FIR filter design: Parks-McClellan
 ----------------------------------
 
 The Parks-McClellan algorithm [PM]_ is based on the Remez exchange
-algorithm [RemezAlg]_.  We won't give a detailed description here; most
+algorithm [RemezAlg]_.  This is a "minimax" optimization; that is,
+it miminizes the maximum value of :math:`|E(\omega)|` over
+:math:`0 \le \omega \le \pi`, where
+:math:`E(\omega)` is the (weighted) deviation of the actual frequency
+response from the desired frequency response:
+
+.. math::
+   :label: eq-weighted-error-omega
+
+   E(\omega) = W(\omega)(A(\omega) - D(\omega)),  \quad 0 \le \omega \le \pi,
+
+We won't give a detailed description of the algorithm here; most
 texts on digital signal processing explain the algorithm (e.g. Section
 7.7 of Oppenheim and Schafer [OS]_). The method is implemented in ``scipy.signal``
 by the function ``remez``.
@@ -1197,24 +1210,12 @@ review the linear programming formulation, and then we discuss
 the implementation.
 
 **Formulating the design problem as a linear program.**
-This description follows the explanation in Ivan Selesnick's lecture
+Like the Parks-McClellan method, this approach is a "minimax"
+optimization of Eq. (:ref:`eq-weighted-error-omega`).
+Our description follows the explanation in Ivan Selesnick's lecture
 notes [Selesnick]_.  This formulation is for a Type I filter (that is,
 an odd number of taps with even symmetry), but
 the same ideas can be applied to other FIR filter types.
-
-Define the weighted error
-
-.. math::
-   :label: eq-weighted-error-omega
-
-   E(\omega) = W(\omega)(A(\omega) - D(\omega)),  \quad 0 \le \omega \le \pi,
-
-where :math:`\omega` is the frequency in radians per sample,
-:math:`A(\omega)` is the filter's (real, signed) frequency response,
-:math:`D(\omega)` is the desired frequency response, and
-:math:`W(\omega)` is the weight assigned to the error at :math:`\omega`.
-:math:`D(\omega)` and :math:`W(\omega)` are design inputs that
-are independent of the filter coefficients.
 
 For convenience, we'll consider the FIR filter coefficients for
 a filter of length :math:`2R + 1` using *centered* indexing:
@@ -1234,8 +1235,8 @@ per sample.  The frequency response can be written
 
 where we define :math:`p_{_0} = b_{_0}` and,
 for :math:`1 \le i \le R`, :math:`p_{_i} = 2b_{_i}`.
-We've used the even symmetry of the cosine function and the filter coefficients
-(:math:`b_{_{-i}} = b_{_i}`).
+We've used the even symmetry of the cosine function and the of filter coefficients
+about the middle coefficient (:math:`b_{_{-i}} = b_{_i}`).
 
 The "minimax" problem is to minimize the maximum error.  That is,
 choose the filter coefficients such that
@@ -1262,7 +1263,7 @@ algebra, the problem can be written as
 To implement this as a linear programming problem, we use a suitably dense
 grid of :math:`L` frequencies
 :math:`{\omega_{_0}, \omega_{_1}, \ldots, \omega_{_{L-1}}}`
-(not necessarily uniformaly spaced).
+(not necessarily uniformly spaced).
 We define the
 :math:`L \times (R+1)` matrix :math:`C` as
 
@@ -1319,12 +1320,12 @@ than in ``remez``.
 
 The advantage of the linear programming method is its ability to
 easily handle additional constraints.  Any constraint, either equality
-or inequality, that be written as a linear constraint can be added
+or inequality, that can be written as a linear constraint can be added
 to the problem.
 
-We will demonstrate how to implement a lowpass filter design
-using linear programming with the constraint that :math:`H(0) = 1`.
-This requirement is
+We will demonstrate how to implement a lowpass filter design using linear
+programming with the constraint that the gain for a constant input is
+exactly 1.  That is,
 
 .. math::
 
@@ -1349,7 +1350,7 @@ to design a lowpass filter with a pass band of :math:`[0, \omega_p]`
 and a stop band of :math:`[\omega_s, \pi]`, where the frequencies
 :math:`\omega_p` and :math:`\omega_s` are expressed in radians per
 sample, and :math:`0 < \omega_p < \omega_s < \pi`.  We'll also
-impose the constraint that :math:`H(0) = 1`.
+impose the constraint that :math:`A(0) = 1`.
 
 A choice for the density of the frequency samples on :math:`[0, \pi]`
 that works well is :math:`16N`, where :math:`N` is the number of taps
@@ -1369,7 +1370,7 @@ The grids of frequencies on the pass and stop bands are then
     wpgrid = np.linspace(0, wp, numfreqs_pass)
     wsgrid = np.linspace(ws, np.pi, numfreqs_stop)
 
-We will impose an equality constraint on :math:`H(0)`, so we can can
+We will impose an equality constraint on :math:`A(0)`, so we can can
 remove that frequency from ``wpgrid``--there is no point in requiring
 both the equality and inequality constraints at :math:`\omega = 0`.
 Then ``wpgrid`` and ``wsgrid`` are concatenated to form ``wgrid``,
@@ -1390,8 +1391,8 @@ We create the array of weights on the grid with
         (np.full_like(wpgrid, fill_value=wtpass),
          np.full_like(wsgrid, fill_value=wtstop)))
 
-The desired values are 1 in the pass band and 0 in the stop
-band.  Evaluated on the grid, we have
+The desired values of the frequency response are 1 in the pass band and 0
+in the stop band.  Evaluated on the grid, we have
 
 .. code-block:: python
 
@@ -1425,7 +1426,7 @@ that are actually passed to ``linprog``:
     c[-1] = 1
 
 In code, the arrays for the equality constraint needed to
-define :math:`H(0) = 1` are:
+define :math:`A(0) = 1` are:
 
 .. code-block:: python
 
@@ -1470,7 +1471,7 @@ used ``wtpass = 2`` and ``wtstop = 1``.
 .. figure:: figs/firlp_lowpass_example.pdf
 
    Result of solving a lowpass FIR filter design problem by linear
-   programming with the constraint :math:`H(0) = 1`.
+   programming with the constraint :math:`A(0) = 1`.
    The response without the extra constraint, solved using ``remez``,
    is also plotted.
 
@@ -1493,19 +1494,29 @@ The maximum width of the transition from the pass band to stop band is
 :math:`\Delta \omega`, and the cutoff frequency :math:`\omega_c` is
 centered in the transition band.
 
-In this section and the next, we'll consider the following filter
+In the next two sections, we'll consider the following filter
 design problem.  We need a lowpass filter for a signal that is
 sampled at 1000 Hz.  The desired cutoff frequency is 180 Hz, and the
 transition from the pass band to the stop band must not exceed
 30 Hz.  In the pass band, the gain of the filter should deviate
 from 1 by no more than 0.005 (i.e. worst case ripple is 0.5%).
 In the stop band, the gain must be less than 0.002 (about 54 dB attenuation).
-In this section, we'll tackle the design using the
-Kaiser window method, and in the next we'll obtain an optimal design
+In the next section, we'll tackle the design using the
+Kaiser window method.  After that, we'll obtain an optimal design
 by using the Parks-McClellan method.
 
-Kaiser [Kaiser66]_ [Kaiser74]_ [... TODO ...].
-This method is also described in Sections 7.5.3 and 7.6 of the text by
+Kaiser's window method
+----------------------
+
+The Kaiser window is a window function with a parameter :math:`\beta`
+that controls the shape of the function.  An example of a Kaiser window
+is plotted in Figure :ref:`fig-firwin2-examples-windows`.
+Kaiser [Kaiser66]_ [Kaiser74]_ developed formulas that, for a given
+transition width :math:`\Delta \omega` and error tolerance for
+the frequency response,
+determine the order :math:`M` and the parameter :math:`\beta` required
+to meet the requirements.  Summaries of the method can be found in
+many sources, including Sections 7.5.3 and 7.6 of the text by
 Oppenheim and Schafer [OS]_.
 
 In Kaiser's method, there is only one parameter that controls the passband
@@ -1518,13 +1529,8 @@ One can interpret the argument ``ripple`` as the maximum deviation
 :math:`A(\omega)` is the magnitude of the actual frequency response
 of the filter and :math:`D(\omega)` is the desired frequency response.
 (That is, in the pass band, :math:`D(\omega) = 1`, and in the stop band,
-:math:`D(\omega) = 0`.) In the script below, :math:`|A(\omega) - D(\omega)|`
-is plotted in the third plot.
-
-Kaiser developed an expression for :math:`\beta` (the Kaiser window parameter)
-that depends on the stop band rejection, and also a formula for the filter
-order in terms of the stop band rejection and :math:`\Delta\omega`, where
-:math:`\Delta\omega` is the transition width between the pass and stop bands.
+:math:`D(\omega) = 0`.) In Figure :ref:`fig-kaiser-lowpass-filter-design`,
+the bottom plot shows :math:`|A(\omega) - D(\omega)|`.
 
 The Kaiser window design method, then, is to determine the length of the
 filter and the Kaiser window parameter :math:`\beta` using Kaiser's formula
