@@ -13,13 +13,13 @@ weights = [1, 1, 1]
 
 for numtaps in [31, 47]:
 
-    taps = remez(numtaps, bands, desired, Hz=fs)
+    taps = remez(numtaps, bands, desired, fs=fs)
 
     w, h = freqz(taps, worN=8000)
     w *= 0.5*fs/np.pi
 
     weights = [1, 25, 1]
-    taps2 = remez(numtaps, bands, desired, weights, Hz=fs)
+    taps2 = remez(numtaps, bands, desired, weights, fs=fs)
 
     w2, h2 = freqz(taps2, worN=8000)
     w2 *= 0.5*fs/np.pi

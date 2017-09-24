@@ -13,13 +13,13 @@ f2 = 30
 
 bands =   np.array([0, f1, f1, f2, f2, 0.5*fs])
 desired = np.array([1,  1,  1,  0,  0,      0])
-taps1 = firls(numtaps, bands, desired, nyq=0.5*fs)
+taps1 = firls(numtaps, bands, desired, fs=fs)
 
 w1, h1 = freqz(taps1, worN=8000)
 w1 *= 0.5*fs/np.pi
 
 wts = [100, .01, 1]
-taps2 = firls(numtaps, bands, desired, weight=wts, nyq=0.5*fs)
+taps2 = firls(numtaps, bands, desired, weight=wts, fs=fs)
 
 w2, h2 = freqz(taps2, worN=8000)
 w2 *= 0.5*fs/np.pi

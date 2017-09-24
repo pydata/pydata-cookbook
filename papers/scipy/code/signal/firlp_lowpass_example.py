@@ -136,7 +136,7 @@ bands = np.array([0, cutoff - 0.5*width,
                   cutoff + 0.5*width, 0.5*fs])
 desired = np.array([1, 0])
 weight = np.array([1/deltap, 1/deltas])
-taps_remez = remez(numtaps, bands, desired, weight=weight, Hz=fs, maxiter=1000)
+taps_remez = remez(numtaps, bands, desired, weight=weight, fs=fs, maxiter=1000)
 
 w, h = freqz(taps_remez, worN=nfreqs)
 w *= 0.5*fs/np.pi

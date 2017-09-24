@@ -26,7 +26,7 @@ def remez_lowpass(deltap, deltas, cutoff, width, fs):
                  bands=[0, trans_lo, trans_hi, 0.5*fs],
                  desired=[1, 0],
                  weight=[1/deltap, 1/deltas],
-                 Hz=fs)
+                 fs=fs)
     return taps
 
 
