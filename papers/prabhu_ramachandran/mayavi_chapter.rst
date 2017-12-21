@@ -1,7 +1,7 @@
 :author: Prabhu Ramachandran
 :email: prabhu@aero.iitb.ac.in
-:institution: Department of Aerospace Engineering
-:institution: Indian Institute of Technology Bombay, Powai, Mumbai, India
+:institution: Department of Aerospace Engineering,
+   Indian Institute of Technology Bombay, Powai, Mumbai, India
 :corresponding:
 
 
@@ -205,17 +205,104 @@ to use the new ``viridis`` colormap resulting in Figure :ref:`fig:plot3d`.
 
    Result of ``mlab.plot3d`` with the viridis colormap.  :label:`fig:plot3d`
 
-Other functions to mention with simple examples.
+For two dimensional data with points that are rectilinear one can use
+``mlab.surf``::
 
-- surf
-- mesh
-- contour3d
-- quiver
-- flow
+  x, y = np.mgrid[-3:3:100j,-3:3:100j]
+  z = sin(x*x + y*y)
+  mlab.surf(x, y, z)
+
+This produces a carpet plot. Notice that the ``x, y`` are rectilinear.
+Variants of this function are ``mlab.contour_surf`` which plots contours. For
+points that are not rectilinear but are mappable to a rectilinear set of
+points one can use ``mlab.mesh``.  For example::
+
+   phi, theta = np.mgrid[0:pi:20j, 0:2*pi:20j]
+   x = np.sin(phi)*np.cos(theta)
+   y = np.sin(phi)*np.sin(theta)
+   x = np.cos(phi)
+   mlab.mesh(x, y, z, representation='wireframe')
+
+plots the surface of a unit sphere using a wireframe.
+
+For data with explicit topology like a set of triangles representing a
+polygonal surface one can use ``mlab.triangular_mesh``.  For example::
+
+   x, y, z = [[0., 1., 1], [0., 0, 1], [0., 0, 0]]
+   t = [[0, 1, 2]]
+   mlab.triangular_mesh(x, y, z, t)
+
+Here, the triangles are explicitly specified by referring to indices in the
+point arrays.  Images can also be rendered using ``mlab.imshow``. For example::
+
+   s = np.random.random((2<<12, 2<<12))
+   mlab.imshow(s)
 
 
+For three-dimensional volumetric data that is rectilinear one could do::
 
-Animations.
+   x, y, z = ogrid[-5:5:64j,-5:5:64j,-5:5:64j]
+   mlab.contour3d(x*x*0.5 + y*y + z*z*2)
+
+Thus far all the functions we have looked at dealt with scalar fields,
+``mlab`` provides support for a few simple vector visualizations as well. For
+example::
+
+  x, y, z, u, v, w = np.random.random((6, 50))
+  mlab.quiver3d(x, y, z, u, v, w)
+
+
+Will plot arrows and works for any collection of points. For more structured
+volumetric vector fields one can use ``mlab.flow`` which plots streamlines as
+the following example demonstrates::
+
+   x, y, z = mgrid[-2:3, -2:3, -2:3]
+   r = sqrt(x**2 + y**2 + z**4)
+   u = y*sin(r)/(r+0.001)
+   v = -x*sin(r)/(r+0.001)
+   w = zeros_like(z)
+   obj = mlab.flow(x, y, z, u, v, w, seedtype='plane')
+
+These basic functions are only a small subset of what Mayavi itself offers.
+The simpler ``mlab`` functions only support a few limited options. Since
+Mayavi is built on top of VTK, it supports structured grids, unstructured
+grids, volume rendering, and simple tensor field visualization.
+
+For example, building on the ``mlab.flow`` example above, one could do::
+
+   vcp = mlab.pipeline.vector_cut_plane(obj)
+
+and this would generate a cut plane through the vector field and show arrows
+suitably oriented. Furthermore, one can use the UI to configure a variety of
+parameters very easily. As a slightly more complex example, we can remove the
+vector cut plane, extract the vector norm from the vector field, and show a
+scalar cut plane using just a few lines of code::
+
+   vcp.remove()
+   scp = mlab.pipeline.scalar_cut_plane(mlab.pipeline.extract_vector_norm(obj))
+
+One could also have done this on the pipeline editor UI by right clicking on
+an appropriate node and choosing one of the Mayavi filters or modules.
+
+In addition to these functions, there are also several other utility functions
+that are similar in usage to those available in ``pylab``:
+- ``mlab.gcf``
+- ``mlab.savefig``
+- ``mlab.figure``
+- ``mlab.axes``, ``mlab.outline``
+- ``mlab.title``, ``mlab.xlabel``, ``mlab.ylabel``, ``mlab.zlabel``
+- ``mlab.colorbar``, ``mlab.scalarbar``, ``mlab.vectorbar``
+- ``mlab.show``
+- ``mlab.text3d, mlab.orientation_axes``
+- ``mlab.show_pipeline``
+- ``mlab.view, mlab.roll, mlab.yaw, mlab.move``
+
+More information is available on these in the user guide.
+
+Simple Animations
+~~~~~~~~~~~~~~~~~~
+
+
 
 Script recording and automation.
 
