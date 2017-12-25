@@ -286,6 +286,7 @@ an appropriate node and choosing one of the Mayavi filters or modules.
 
 In addition to these functions, there are also several other utility functions
 that are similar in usage to those available in ``pylab``:
+
 - ``mlab.gcf``
 - ``mlab.savefig``
 - ``mlab.figure``
@@ -302,11 +303,83 @@ More information is available on these in the user guide.
 Simple Animations
 ~~~~~~~~~~~~~~~~~~
 
+``mlab`` makes it easy to perform simple animations, for example::
+
+  x, y = np.mgrid[0:3:1, 0:3:1]
+  s = mlab.surf(x, y, x*0.1)
+  for i in range(10):
+      s.mlab_source.scalars = x*0.1*(i + 1)
+
+The first few lines show a plane with a slight elevation. The ``for`` loop
+automatically updates the visualization to rotate the plane about the y axis.
+The ``mlab_source`` attribute is a special attribute that is specific to the
+simple visualizations produced using ``mlab``. One could also change ``x, y``,
+and ``scalars`` together using the ``s.mlab_source.set`` method.
+
+Sometimes, one may wish to change the shape of the data, for example if the
+mesh defining the points itself changes, just calling ``mlab_source.set`` is
+not enough and one should call ``mlab_source.reset``. Unfortunately, if one
+were to run this, the visualization would not produce a smooth animation due
+to the GUI toolkit mainloop, ``mlab`` provides a convenient decorator for
+this, and converting the above into a simple generator facilitates this::
+
+  @mlab.animate
+  def anim():
+      x, y = np.mgrid[0:3:1, 0:3:1]
+      s = mlab.surf(x, y, x*0.1)
+      for i in range(10):
+          s.mlab_source.scalars = x*0.1*(i + 1)
+          yield
+
+  anim()
+
+This will interact with the GUI toolkits mainloop smoothly. Automatically
+saving a screenshot of the animation is also possible in this case, for
+example::
+
+  f = mlab.figure()
+  f.scene.movie_maker.record = True
+  anim()
+
+Will automatically save each iteration of the for loop into an image located
+in ``~/Documents/mayavi_movies``. This can be configured.
+
+Loading some data
+~~~~~~~~~~~~~~~~~
+
+These are not the only things one can do with Mayavi, VTK supports reading a
+variety of different file formats. Mayavi supports a subset of these and any
+supported file can be opened by simply doing::
+
+  src = mlab.pipeline.open('filename.ext')
+
+Once the data is loaded one may apply a variety of filters and visualization
+modules to this data with Mayavi.
 
 
-Script recording and automation.
+Doing more and automation
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Loading some data.
+Mayavi can be fairly complex given the vast number of options that each
+visualization can often require. While it is easy to quickly whip up a pretty
+visualization using the UI, this does not lend itself for automated plots
+which are extremely important for scripting and reproducibility. Mayavi
+provides a very powerful feature called automatic script recording. On the
+pipeline dialog, one can click on the red record button shown in the figure
+below.
+
+.. figure:: images/record_button.png
+   :align: center
+
+   Record button for automatic script recording.  :label:`fig:record`
+
+When one does this, a text window is shown where one can see the Python code
+for each action performed on the UI. This code is typically executable and can
+be cut/paste to generate a Python script for the visualization. This is
+convenient both for automation and also to learn the Mayavi API.
+
+These features make Mayavi a powerful visualization tool in the hands of
+novice and advanced users.
 
 
 More complex datasets
