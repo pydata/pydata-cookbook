@@ -56,7 +56,7 @@ class Translator(LaTeXTranslator):
         self.figure_alignment = 'left'
         self.table_type = 'table'
 
-        self.active_table.set_table_style('booktabs')
+        self.active_table.set_table_style('booktabs', 'booktabs')
 
     def visit_docinfo(self, node):
         pass
