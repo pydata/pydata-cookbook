@@ -548,13 +548,59 @@ Thus, one could either setup the datasets manually or use some approach like
 this to generate a suitable dataset and then visualize it very easily with Mayavi.
 
 
-- Mouse-click interactions.
-
-
 Custom UIs with Mayavi
 -----------------------
 
-Example of the PySPH viewer.
+Thus far we've explored Mayavi as a library to perform interactive and
+exploratory visualizations. Mayavi can also be used to create custom
+applications for three dimensional visualization. In this section we look at a
+custom viewer that has been implemented in another open source project.
+
+PySPH_ is an open source framework for Smoothed Particle Hydrodynamics
+simulations. The SPH method simulates fluid flow and other problems using
+moving particles. As a result the simulation results are in the form of an
+unstructured collection of particles along with various properties. PySPH
+dumps the particle data in the form of HDF files or as compressed NumPy array
+files (``*.npz``). These need to be quickly visualized. The nature of the
+simulation and data files makes it hard to directly fit into any standard
+visualization file format. Users typically want to do the following:
+
+- load the saved data and visualize the positions of the particles and the
+  various scalar properties.
+- view the evolution of the particles over time.
+- visualize the velocity vectors.
+
+While these can be done using the generic Mayavi viewer or using custom
+scripts, it is much more convenient to have a specialized UI for the common
+tasks. PySPH therefore provides a convenient viewer for such data. The UI
+looks like the following figure.
+
+.. figure:: images/pysph_viewer.png
+   :align: center
+
+   The customized PySPH viewer. :label:`fig:pysphviewer`
+
+The entire customized viewer is about 1150 lines of code and supports a
+variety of features. It is relatively simple to implement a simple viewer for
+such data. This is because Mayavi is implemented using the high-level traits_
+and traitsui_ packages. In the following we explore writing a very simple UI
+similar to the one provided in PySPH to load the particle data and visualize
+it using Mayavi.
+
+
+- First explain loading data from pysph and visualizing it with mlab.
+- Create a simple script that when launched produces a UI showing the particles.
+- Add UI elements to view different scalars.
+- Implement a simple time slider.
+
+
+
+.. _PySPH: https://github.com/pypr/pysph
+
+.. _traits: https://github.com/enthought/traits
+.. _traitsui: https://github.com/enthought/traits
+
+
 
 
 Future
