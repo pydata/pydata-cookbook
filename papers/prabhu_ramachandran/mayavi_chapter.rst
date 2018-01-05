@@ -588,8 +588,129 @@ similar to the one provided in PySPH to load the particle data and visualize
 it using Mayavi.
 
 
-- First explain loading data from pysph and visualizing it with mlab.
-- Create a simple script that when launched produces a UI showing the particles.
+Let us first see how to load the data in pysph::
+
+   from pysph.solver.utils import load
+   data = load('some_output_file.npz')
+   fluid = data['arrays']['fluid']
+
+We can easily visualize the fluid particles with the following code::
+
+   mlab.points3d(fluid.x, fluid.y, fluid.z, fluid.p)
+
+The user may desire to change the scalar to something else. In the above code
+``fluid`` is a particle array. Let us build a simple UI to just view a single
+particle array called "fluid" given a file name. The following code implements
+a very simple viewer
+
+.. code-block:: python
+   :linenos:
+
+   import sys
+   import os
+
+   from traits.api import HasTraits, Instance, Str
+   from traitsui.api import View, Item, Group
+   from mayavi.core.ui.api import (MlabSceneModel,
+       SceneEditor, MayaviScene)
+   from mayavi.core.api import PipelineBase
+
+   from pysph.base.particle_array import ParticleArray
+   from pysph.solver.utils import load
+
+
+   class PySPHViewer(HasTraits):
+
+       scene = Instance(MlabSceneModel, ())
+       scalar = Str("rho")
+       particle_array = Instance(ParticleArray)
+       plot = Instance(PipelineBase)
+       file_name = Str
+
+       view = View(
+           Group(Item(
+              'scene',
+              editor=SceneEditor(scene_class=MayaviScene),
+              height=400, width=600, show_label=False),
+           ),
+           Item('file_name')
+       )
+
+       def update_plot(self):
+           mlab = self.scene.mlab
+           pa = self.particle_array
+           if self.plot is None:
+               self.plot = mlab.points3d(
+                   pa.x, pa.y, pa.z,
+                   getattr(pa, self.scalar),
+                   mode='point'
+               )
+               self.plot.actor.property.point_size = 3
+           else:
+               self.plot.mlab_source.reset(
+                   x=pa.x, y=pa.y, z=pa.z,
+                   scalars=getattr(pa, self.scalar)
+               )
+
+       def _particle_array_changed(self, pa):
+           self.update_plot()
+
+       def _file_name_changed(self, fname):
+           if os.path.exists(fname):
+               data = load(fname)
+               self.particle_array = data['arrays']['fluid']
+
+
+   viewer = PySPHViewer(file_name=sys.argv[1])
+   viewer.configure_traits()
+
+Let us say this script is called ``viewer.py``.  When this script is invoked as,::
+
+  $ python viewer.py elliptical_drop_1000.hdf5
+
+It will produce a UI that shows the data as points. Below the view it also
+shows a simple text box for entering the file name. When this is changed to a
+valid file, the view automatically updates. Let us explore this code a little
+bit to understand it a little better.
+
+We ignore the imports for now, and see that we have basically created a class
+called ``PySPHViewer`` that subclasses ``HasTraits``. We then define several
+instance attributes (which are called *traits*):
+
+- The ``scene`` is an instance of ``MlabSceneModel``, this is a special
+  instance that allows us to embed the Mayavi scene in a traits object.
+- ``scalar`` is a string that is the particular scalar that we wish to
+  visualize. It defaults to "rho" which is the density.
+- ``particle_array`` is the PySPH particle array instance we wish to view.
+- ``plot`` is the actual Mayavi object produced by the visualization. This is
+  created in the ``update_plot`` method.
+- ``file_name`` is a string with the name of the file.
+
+- ``view`` this is a special attribute that declaratively describes how the UI
+  should look. The code for the scene is boilerplate and all examples use
+  something like the code shown above. A complete explanation is out of scope
+  of this article but the ``Item`` specifies that the ``scene`` should be
+  shown. The ``editor`` kwarg specifies the UI element to be used and the
+  height and width specify the size of the Mayavi widget. Below the ``scene``
+  item is a ``file_name`` item which asks for a simple text editor for the
+  file name string.
+
+The visualization code is in ``update_plot`` which is rather straightforward
+code using ``mlab``. The only special thing is that we use ``self.scene.mlab``
+instead of a raw ``mlab`` in order to ensure that the scene is first setup
+before any mlab commands are drawn.
+
+Finally, whenever the ``file_name`` trait is changed, the
+``_file_name_changed`` method is automatically called and if the filename is
+valid, we try to open it and set the particle_array and each time the
+``particle_array`` trait is changed it calls ``self.update_plot`` and thus
+refreshes the plot.
+
+This shows that once one crosses the hurdle of the initial boiler plate code,
+it is relatively easy to quickly build a simple user interface declaratively
+with the traits_ and traitsui_ package.
+
+
 - Add UI elements to view different scalars.
 - Implement a simple time slider.
 
