@@ -736,6 +736,9 @@ below:
 
    Simple PySPH viewer.  :label:`fig:viewer1`
 
+Note that the top left toolbar icon is the Mayavi logo and clicking that will
+open up the Mayavi pipeline editor which can still be used to configure the
+visualization entirely. This is a very powerful and handy feature.
 
 Let us explore the code a little bit to understand it a little better. The
 additions to the previous code are:
@@ -765,9 +768,66 @@ This shows that once one crosses the hurdle of the initial boiler plate code,
 it is relatively easy to quickly build a simple user interface declaratively
 with the traits_ and traitsui_ package.
 
+If we wish to add a simple text entry to select an appropriate scalar we can
+modify the code as follows::
 
-- Add UI elements to view different scalars.
-- Implement a simple time slider.
+   # ...
+
+   class PySPHViewer(HasTraits):
+
+       view = View(
+           # ...
+           Item('file_name'),
+           Item('scalar'),  # Added!
+           # ...
+       )
+
+       def _scalar_changed(self, scalar):
+           pa = self.particle_array
+           if pa is not None and scalar in pa.properties:
+               self.update_plot()
+
+
+This simply checks if the specified scalar is a valid one and sets it. A nicer
+way to do this would be to only allow certain scalars. This can be done with a
+bit more code as follows::
+
+   from traits.api import List
+   from traitsui.api import EnumEditor
+
+   class PySPHViewer(HasTraits):
+
+       scalar_list = List(Str)
+
+       view = View(
+           # ...
+           Item('file_name'),
+           Item('scalar',
+                editor=EnumEditor(name='scalar_list')),
+           # ...
+       )
+
+       def _particle_array_changed(self, pa):
+           self.scalar_list = list(pa.properties.keys())
+           self.update_plot()
+
+
+The resulting UI will show a drop down which automatically has a list of
+possible values to choose from. This shows how it is easy to build a fairly
+complex UI with a very small amount of code.
+
+In similar fashion it is possible to modify the UI to support multiple files
+along with a slider to switch between these files. This is a very useful
+feature. Once again, doing this is not particularly difficult and only
+requires a few more lines of code.
+
+Since traitsui_ supports both Qt and wxPython, the UIs built can actually be
+embedded into any GUI application using these toolkits. Thus, one could embed
+such a UI in a more complex application if needed.
+
+We see that we are able to quickly build customized user interfaces with the
+complete power of Mayavi with a minimum amount of code while retaining a very
+Pythonic implementation.
 
 
 
@@ -782,7 +842,40 @@ with the traits_ and traitsui_ package.
 Future
 ------
 
-Jupyter notebook support and future improvements.
+As seen in the previous sections, Mayavi can be used in a variety of ways. One
+can use it to make simple plots, make more sophisticated plots, and also build
+customized user interfaces.
+
+Mayavi supports very limited support for Jupyter notebooks. One can embed
+Mayavi plots as X3D data in a notebook. This allows for the plots to be
+rendered by the browser. This is limited as it does not support all the
+different interactive visualization that Mayavi provides but it does allow a
+user to view (in 3D) the rendered visualization on a browser. For example, one
+could run the following code in a notebook cell::
+
+  from mayavi import mlab
+  mlab.init_notebook()
+
+  mlab.test_plot3d()
+
+and this will produce a 3D view of the plot.
+
+While mayavi is already very useful. Installation can be difficult since VTK
+is typically fairly hard to install. Traitsui_ only has recently added support
+for Qt5 making installation with Qt5 a bit difficult.
+
+These will be improved over the next year. Mayavi does not yet support
+multi-block datasets, large datasets or parallel rendering. We are looking at
+adding some new features to allow some of these in the future.
 
 Conclusions
 -----------
+
+We have presented the Mayavi package and shown how easy it is to use and
+quickly visualize data. Mayavi provides a powerful, scriptable API, and also
+provides a full-fledged user interface. In addition, it provides a unique
+feature of being able to record all UI actions into a readable Python script.
+This is a feature commonly found only in expensive commercial packages. Mayavi
+also builds on top of Enthought's ``traits`` and ``traitsui`` packages which
+make it very easy to build customized user interfaces with a small amount of
+code. These features make Mayavi a very useful tool for a scientist.
