@@ -1,0 +1,11 @@
+The data in "pressure.dat" was provided by stackoverflow user Nimal Naser at:
+
+    https://stackoverflow.com/questions/28536191/how-to-filter-smooth-with-scipy-numpy
+
+According to the stackoverflow website, user contributions are licensed
+under the CC-BY-SA license:
+
+    https://creativecommons.org/licenses/by-sa/3.0/
+
+As stipulated under that license, this data is provided here under the same
+license.
