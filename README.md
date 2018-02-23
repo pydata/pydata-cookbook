@@ -13,6 +13,17 @@ The book will cover several major topics, organized as such, with some sample pa
 
 We expect each submission to be about 15 - 20 pages describing an example of the power of each library. While we have reached out to the projects about putting each submission together we are happy to accept chapters for libraries we did not initially identify.
 
+## FAQ
+
+Q: There are normally royalties for book authors. What happens to those?
+
+A: All royalties go to NumFOCUS and will be used to support the further development of projects in the PyData stack.
+
+Q: Is all content we contribute reusable for documentation of projects?
+
+A: We can use chapters for documentation of projects but not a collection of all chapters in one volume. Essentially, there needs to be some value to buying the book to be published.
+
+
 ## Instructions for Reviewers
 
 - Click on the Pull Requests Tab and browse to find the papers assigned to you
