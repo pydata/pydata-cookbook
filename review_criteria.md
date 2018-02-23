@@ -22,13 +22,6 @@ review criteria are enthusiastically welcomed via discussion or pull request.
 - The work should describe the development or use of python software for 
   approaching a problem in a domain within the scope of the conference.
 
-## Novelty and Impact
-
-- The work should employ new or innovative methods or approaches to a problem.
-- The work should advance the state of a scientific domain, the practice 
-  of scientific computing itself, or another subject area within the scope of 
-  the conference.
-
 ## Verifiability
 
 - Software descriptions should be accompanied by references to or examples of 
@@ -50,7 +43,7 @@ review criteria are enthusiastically welcomed via discussion or pull request.
 
 ### Length
 
-- The compiled version should be no longer than 8 pages, including figures.  
+- The compiled version should be no longer than 15 pages, including figures.  
 
 ### Figures
 
