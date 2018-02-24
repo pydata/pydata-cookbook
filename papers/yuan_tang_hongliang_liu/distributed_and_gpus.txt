@@ -18,10 +18,74 @@ shows that XGBoost’s performance scales linearly as we add more machines. XGBo
 able to handle the entire 1.7 billion data with only four machines which greatly shows the
 system’s potential to handle even larger data.
 
-Local distributed: https://github.com/dmlc/xgboost/tree/master/tests/distributed
-AWS Yarn:
-	https://xgboost.readthedocs.io/en/latest/tutorials/aws_yarn.html
-	https://github.com/dmlc/xgboost/tree/master/demo/distributed-training
+The distributed XGBoost is currently available as a CLI program with a configuration file or a Python script.
+Users should follow the detailed instruction to configure XGBoost for distributed training in
+the [latest docs](https://xgboost.readthedocs.io/en/latest/).
+
+Below is an example configuration file named "dist.conf" where we specify the parameters for defining
+both the booster and the task:
+
+```
+booster = gbtree
+objective = binary:logistic
+eta = 1.0
+gamma = 1.0
+min_child_weight = 1
+max_depth = 3
+num_round = 2
+save_period = 0
+eval_train = 1
+```
+
+and then submit the distributed job to cluster, e.g. YARN, using
+[dmlc-submit](https://github.com/dmlc/dmlc-core/tree/master/tracker) script:
+
+```
+dmlc-core/tracker/dmlc-submit --cluster=yarn --num-workers=2 --worker-cores=2 \
+    dist.conf nthread=2 \
+    data=s3://my-bucket/xgb-demo/train \
+    eval[test]=s3://my-bucket/xgb-demo/test \
+    model_dir=s3://my-bucket/xgb-demo/model
+```
+
+Users can also submit a Python script to the cluster for distributed training.
+The following is an example Python script named "dist.py" that performs training
+and testing of the model using XGBoost demo dataset:
+
+```python
+import xgboost as xgb
+
+xgb.rabit.init()
+
+dtrain = xgb.DMatrix('demo/data/agaricus.txt.train')
+dtest = xgb.DMatrix('demo/data/agaricus.txt.test')
+
+param = {'max_depth': 2, 'eta': 1, 'silent': 1, 'objective': 'binary:logistic'}
+
+watchlist  = [(dtest,'eval'), (dtrain,'train')]
+num_round = 20
+
+bst = xgb.train(param, dtrain, num_round, watchlist, early_stopping_rounds=2)
+
+if xgb.rabit.get_rank() == 0:
+    bst.save_model("test.model")
+
+xgb.rabit.finalize()
+```
+
+First, call `xgb.rabit.init()` to initialize the distribute training and then load the
+datasets. Note that the datasets will be automatically sharded in distributed mode.
+
+Users can use `xgb.rabit.get_rank()` to get the current process. In the above example,
+we explicilty tell process 0 to save the model after training.
+
+Finally, notify the tracker that the distributed training is successful using `xgb.rabit.finalize()`.
+
+We can then submit the Python script using the same dmlc-submit script that we used earlier:
+
+```
+dmlc-core/tracker/dmlc-submit  --cluster=local --num-workers=2 python dist.py
+```
 
 ## GPU-accelerated training
 
@@ -62,6 +126,13 @@ params = {
 }
 xgb.train(params, training_data, num_round, ...)
 ```
+
+There are other parameters related to the GPU plug-in. For example, GPU-accelerated
+prediction is enabled by default if the above "tree_method" parameter is set to use GPU
+with "predictor" parameter being set as "gpu_predictor" by default. However, users
+can switch to only use CPU for making predictions by changing `predictor` parameter
+to `cpu_predictor` to help conserve GPU memory. There's also "gpu_id" parameter that
+can be used to select the device ordinal.
 
 ## External memory
 
