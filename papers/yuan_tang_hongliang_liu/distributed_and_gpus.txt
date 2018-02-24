@@ -1,0 +1,94 @@
+# Distributed and GPU-accelerated XGBoost
+
+Though XGBoost has been proven to be highly efficient and scalable by industries, research labs,
+and data science competitions, it usually take hours or even days to train a model on
+extremely large dataset. Building highly accurate models using gradient boosting also requires
+extensive parameter tuning. For example, a classification task may involve running the algorithm
+multiple times for different learning rates or maximum tree depths to explore the effect of different
+parameter combinations on classification metrics such as accuracy or AUC. In case of very
+large datasets that cannot fit into the memory of the machine, XGBoost can switch to out-of-core
+setting to smoothly scale to billions of training samples with limited computing resources.
+
+
+## Distributed training
+
+XGBoost can run in distributed settings with very scalable performance.
+The results in the [original XGBoost paper](https://dl.acm.org/ft_gateway.cfm?id=2939785&type=pdf)
+shows that XGBoost’s performance scales linearly as we add more machines. XGBoost is
+able to handle the entire 1.7 billion data with only four machines which greatly shows the
+system’s potential to handle even larger data.
+
+Local distributed: https://github.com/dmlc/xgboost/tree/master/tests/distributed
+AWS Yarn:
+	https://xgboost.readthedocs.io/en/latest/tutorials/aws_yarn.html
+	https://github.com/dmlc/xgboost/tree/master/demo/distributed-training
+
+## GPU-accelerated training
+
+A [CUDA](https://en.wikipedia.org/wiki/CUDA)-based implementation of the decision
+tree constructions is also available within XGBoost. The tree construction
+algorithm is executed exclusively on the graphics processing unit (GPU). It has shown
+shown high performance with a variety of datasets and settings, e.g. sparse input matrices.
+
+Individual boosting iterations are executed in parallel within GPUs. An interleaved approach
+is used for shallow trees, switching to a more conventional radix sort-based approach for larger depths.
+We show speedups of between 3× and 6× using a Titan X compared to a 4 core i7 CPU, and 1.2× using
+a Titan X compared to 2× Xeon CPUs (24 cores). The [original paper](https://peerj.com/articles/cs-127/)
+for XGBoost GPU implementation shows that it is possible to process the
+Higgs dataset with 10 million samples and 28 variables entirely within GPU memory.
+The implementation is exposed as a plug-in within XGBoost framework to fully support existing
+functionalities such as classification, regression, and rank learning tasks.
+
+To use GPU-accelerated algorithms, users can simply change the value of "tree_method" in
+XGBoost training parameters to be "gpu_hist" instead of "hist". For example, the following
+code would run XGBoost using only the CPU implementation:
+
+```python
+params = {
+	'objective': 'multi:softmax',
+	'num_class': 2,
+	'tree_method': 'hist'
+}
+xgb.train(params, training_data, num_round, ...)
+```
+
+while this next code snippet switches to use the GPU-accelerated algorithms:
+
+```python
+params = {
+	'objective': 'multi:softmax',
+	'num_class': 2,
+	'tree_method': 'gpu_hist'
+}
+xgb.train(params, training_data, num_round, ...)
+```
+
+## External memory
+
+If the data is too large to fit into the memory, e.g. large datasets from distributed file systems or
+large datasets saved in libsvm format locally, users can switch to use the external memory version
+of XGBoost by making one simple change to the dataset file path.
+
+The external memory version takes in the following filename format:
+`filename#cacheprefix`
+where the `filename` is the normal path to libsvm file to be loaded, `cacheprefix` is
+a path to a cache file that XGBoost will use for external memory cache.
+
+For example, instead of normally importing data like the following similar to other examples of this chapter:
+
+```python
+data = xgb.DMatrix('data/agaricus.txt.train')
+```
+
+we modify the code to the following to enable the external memory version:
+
+```python
+data = xgb.DMatrix('data/agaricus.txt.train#dtrain.cache')
+```
+
+The external memory mode natively works on distributed version, for example, you can specify
+a path to your dataset stored in distributed file system:
+
+```python
+data = "hdfs://data/agaricus.txt.train#dtrain.cache"
+```
