@@ -1,165 +1,190 @@
-# Distributed and GPU-accelerated XGBoost
+Distributed and GPU-accelerated XGBoost
+=======================================
 
-Though XGBoost has been proven to be highly efficient and scalable by industries, research labs,
-and data science competitions, it usually take hours or even days to train a model on
-extremely large dataset. Building highly accurate models using gradient boosting also requires
-extensive parameter tuning. For example, a classification task may involve running the algorithm
-multiple times for different learning rates or maximum tree depths to explore the effect of different
-parameter combinations on classification metrics such as accuracy or AUC. In case of very
-large datasets that cannot fit into the memory of the machine, XGBoost can switch to out-of-core
-setting to smoothly scale to billions of training samples with limited computing resources.
+Though XGBoost has been proven to be highly efficient and scalable by
+industries, research labs, and data science competitions, it usually
+take hours or even days to train a model on extremely large dataset.
+Building highly accurate models using gradient boosting also requires
+extensive parameter tuning. For example, a classification task may
+involve running the algorithm multiple times for different learning
+rates or maximum tree depths to explore the effect of different
+parameter combinations on classification metrics such as accuracy or
+AUC. In case of very large datasets that cannot fit into the memory of
+the machine, XGBoost can switch to out-of-core setting to smoothly scale
+to billions of training samples with limited computing resources.
 
-
-## Distributed training
+Distributed training
+--------------------
 
 XGBoost can run in distributed settings with very scalable performance.
-The results in the [original XGBoost paper](https://dl.acm.org/ft_gateway.cfm?id=2939785&type=pdf)
-shows that XGBoost’s performance scales linearly as we add more machines. XGBoost is
-able to handle the entire 1.7 billion data with only four machines which greatly shows the
-system’s potential to handle even larger data.
+The results in the `original XGBoost
+paper <https://dl.acm.org/ft_gateway.cfm?id=2939785&type=pdf>`__ shows
+that XGBoost’s performance scales linearly as we add more machines.
+XGBoost is able to handle the entire 1.7 billion data with only four
+machines which greatly shows the system’s potential to handle even
+larger data.
 
-The distributed XGBoost is currently available as a CLI program with a configuration file or a Python script.
-Users should follow the detailed instruction to configure XGBoost for distributed training in
-the [latest docs](https://xgboost.readthedocs.io/en/latest/).
+The distributed XGBoost is currently available as a CLI program with a
+configuration file or a Python script. Users should follow the detailed
+instruction to configure XGBoost for distributed training in the `latest
+docs <https://xgboost.readthedocs.io/en/latest/>`__.
 
-Below is an example configuration file named "dist.conf" where we specify the parameters for defining
-both the booster and the task:
+Below is an example configuration file named "dist.conf" where we
+specify the parameters for defining both the booster and the task:
 
-```
-booster = gbtree
-objective = binary:logistic
-eta = 1.0
-gamma = 1.0
-min_child_weight = 1
-max_depth = 3
-num_round = 2
-save_period = 0
-eval_train = 1
-```
+::
+
+    booster = gbtree
+    objective = binary:logistic
+    eta = 1.0
+    gamma = 1.0
+    min_child_weight = 1
+    max_depth = 3
+    num_round = 2
+    save_period = 0
+    eval_train = 1
 
 and then submit the distributed job to cluster, e.g. YARN, using
-[dmlc-submit](https://github.com/dmlc/dmlc-core/tree/master/tracker) script:
+`dmlc-submit <https://github.com/dmlc/dmlc-core/tree/master/tracker>`__
+script:
 
-```
-dmlc-core/tracker/dmlc-submit --cluster=yarn --num-workers=2 --worker-cores=2 \
-    dist.conf nthread=2 \
-    data=s3://my-bucket/xgb-demo/train \
-    eval[test]=s3://my-bucket/xgb-demo/test \
-    model_dir=s3://my-bucket/xgb-demo/model
-```
+::
 
-Users can also submit a Python script to the cluster for distributed training.
-The following is an example Python script named "dist.py" that performs training
-and testing of the model using XGBoost demo dataset:
+    dmlc-core/tracker/dmlc-submit --cluster=yarn --num-workers=2 --worker-cores=2 \
+        dist.conf nthread=2 \
+        data=s3://my-bucket/xgb-demo/train \
+        eval[test]=s3://my-bucket/xgb-demo/test \
+        model_dir=s3://my-bucket/xgb-demo/model
 
-```python
-import xgboost as xgb
+Users can also submit a Python script to the cluster for distributed
+training. The following is an example Python script named "dist.py" that
+performs training and testing of the model using XGBoost demo dataset:
 
-xgb.rabit.init()
+.. code:: python
 
-dtrain = xgb.DMatrix('demo/data/agaricus.txt.train')
-dtest = xgb.DMatrix('demo/data/agaricus.txt.test')
+    import xgboost as xgb
 
-param = {'max_depth': 2, 'eta': 1, 'silent': 1, 'objective': 'binary:logistic'}
+    xgb.rabit.init()
 
-watchlist  = [(dtest,'eval'), (dtrain,'train')]
-num_round = 20
+    dtrain = xgb.DMatrix('demo/data/agaricus.txt.train')
+    dtest = xgb.DMatrix('demo/data/agaricus.txt.test')
 
-bst = xgb.train(param, dtrain, num_round, watchlist, early_stopping_rounds=2)
+    param = {'max_depth': 2, 'eta': 1, 'silent': 1, 'objective': 'binary:logistic'}
 
-if xgb.rabit.get_rank() == 0:
-    bst.save_model("test.model")
+    watchlist  = [(dtest,'eval'), (dtrain,'train')]
+    num_round = 20
 
-xgb.rabit.finalize()
-```
+    bst = xgb.train(param, dtrain, num_round, watchlist, early_stopping_rounds=2)
 
-First, call `xgb.rabit.init()` to initialize the distribute training and then load the
-datasets. Note that the datasets will be automatically sharded in distributed mode.
+    if xgb.rabit.get_rank() == 0:
+        bst.save_model("test.model")
 
-Users can use `xgb.rabit.get_rank()` to get the current process. In the above example,
-we explicilty tell process 0 to save the model after training.
+    xgb.rabit.finalize()
 
-Finally, notify the tracker that the distributed training is successful using `xgb.rabit.finalize()`.
+First, call ``xgb.rabit.init()`` to initialize the distribute training
+and then load the datasets. Note that the datasets will be automatically
+sharded in distributed mode.
 
-We can then submit the Python script using the same dmlc-submit script that we used earlier:
+Users can use ``xgb.rabit.get_rank()`` to get the current process. In
+the above example, we explicilty tell process 0 to save the model after
+training.
 
-```
-dmlc-core/tracker/dmlc-submit  --cluster=local --num-workers=2 python dist.py
-```
+Finally, notify the tracker that the distributed training is successful
+using ``xgb.rabit.finalize()``.
 
-## GPU-accelerated training
+We can then submit the Python script using the same dmlc-submit script
+that we used earlier:
 
-A [CUDA](https://en.wikipedia.org/wiki/CUDA)-based implementation of the decision
-tree constructions is also available within XGBoost. The tree construction
-algorithm is executed exclusively on the graphics processing unit (GPU). It has shown
-shown high performance with a variety of datasets and settings, e.g. sparse input matrices.
+::
 
-Individual boosting iterations are executed in parallel within GPUs. An interleaved approach
-is used for shallow trees, switching to a more conventional radix sort-based approach for larger depths.
-We show speedups of between 3× and 6× using a Titan X compared to a 4 core i7 CPU, and 1.2× using
-a Titan X compared to 2× Xeon CPUs (24 cores). The [original paper](https://peerj.com/articles/cs-127/)
-for XGBoost GPU implementation shows that it is possible to process the
-Higgs dataset with 10 million samples and 28 variables entirely within GPU memory.
-The implementation is exposed as a plug-in within XGBoost framework to fully support existing
-functionalities such as classification, regression, and rank learning tasks.
+    dmlc-core/tracker/dmlc-submit  --cluster=local --num-workers=2 python dist.py
 
-To use GPU-accelerated algorithms, users can simply change the value of "tree_method" in
-XGBoost training parameters to be "gpu_hist" instead of "hist". For example, the following
-code would run XGBoost using only the CPU implementation:
+GPU-accelerated training
+------------------------
 
-```python
-params = {
-	'objective': 'multi:softmax',
-	'num_class': 2,
-	'tree_method': 'hist'
-}
-xgb.train(params, training_data, num_round, ...)
-```
+A `CUDA <https://en.wikipedia.org/wiki/CUDA>`__-based implementation of
+the decision tree constructions is also available within XGBoost. The
+tree construction algorithm is executed exclusively on the graphics
+processing unit (GPU). It has shown shown high performance with a
+variety of datasets and settings, e.g. sparse input matrices.
 
-while this next code snippet switches to use the GPU-accelerated algorithms:
+Individual boosting iterations are executed in parallel within GPUs. An
+interleaved approach is used for shallow trees, switching to a more
+conventional radix sort-based approach for larger depths. We show
+speedups of between 3× and 6× using a Titan X compared to a 4 core i7
+CPU, and 1.2× using a Titan X compared to 2× Xeon CPUs (24 cores). The
+`original paper <https://peerj.com/articles/cs-127/>`__ for XGBoost GPU
+implementation shows that it is possible to process the Higgs dataset
+with 10 million samples and 28 variables entirely within GPU memory. The
+implementation is exposed as a plug-in within XGBoost framework to fully
+support existing functionalities such as classification, regression, and
+rank learning tasks.
 
-```python
-params = {
-	'objective': 'multi:softmax',
-	'num_class': 2,
-	'tree_method': 'gpu_hist'
-}
-xgb.train(params, training_data, num_round, ...)
-```
+To use GPU-accelerated algorithms, users can simply change the value of
+"tree\_method" in XGBoost training parameters to be "gpu\_hist" instead
+of "hist". For example, the following code would run XGBoost using only
+the CPU implementation:
 
-There are other parameters related to the GPU plug-in. For example, GPU-accelerated
-prediction is enabled by default if the above "tree_method" parameter is set to use GPU
-with "predictor" parameter being set as "gpu_predictor" by default. However, users
-can switch to only use CPU for making predictions by changing `predictor` parameter
-to `cpu_predictor` to help conserve GPU memory. There's also "gpu_id" parameter that
-can be used to select the device ordinal.
+.. code:: python
 
-## External memory
+    params = {
+        'objective': 'multi:softmax',
+        'num_class': 2,
+        'tree_method': 'hist'
+    }
+    xgb.train(params, training_data, num_round, ...)
 
-If the data is too large to fit into the memory, e.g. large datasets from distributed file systems or
-large datasets saved in libsvm format locally, users can switch to use the external memory version
-of XGBoost by making one simple change to the dataset file path.
+while this next code snippet switches to use the GPU-accelerated
+algorithms:
+
+.. code:: python
+
+    params = {
+        'objective': 'multi:softmax',
+        'num_class': 2,
+        'tree_method': 'gpu_hist'
+    }
+    xgb.train(params, training_data, num_round, ...)
+
+There are other parameters related to the GPU plug-in. For example,
+GPU-accelerated prediction is enabled by default if the above
+"tree\_method" parameter is set to use GPU with "predictor" parameter
+being set as "gpu\_predictor" by default. However, users can switch to
+only use CPU for making predictions by changing ``predictor`` parameter
+to ``cpu_predictor`` to help conserve GPU memory. There's also "gpu\_id"
+parameter that can be used to select the device ordinal.
+
+External memory
+---------------
+
+If the data is too large to fit into the memory, e.g. large datasets
+from distributed file systems or large datasets saved in libsvm format
+locally, users can switch to use the external memory version of XGBoost
+by making one simple change to the dataset file path.
 
 The external memory version takes in the following filename format:
-`filename#cacheprefix`
-where the `filename` is the normal path to libsvm file to be loaded, `cacheprefix` is
-a path to a cache file that XGBoost will use for external memory cache.
+``filename#cacheprefix`` where the ``filename`` is the normal path to
+libsvm file to be loaded, ``cacheprefix`` is a path to a cache file that
+XGBoost will use for external memory cache.
 
-For example, instead of normally importing data like the following similar to other examples of this chapter:
+For example, instead of normally importing data like the following
+similar to other examples of this chapter:
 
-```python
-data = xgb.DMatrix('data/agaricus.txt.train')
-```
+.. code:: python
 
-we modify the code to the following to enable the external memory version:
+    data = xgb.DMatrix('data/agaricus.txt.train')
 
-```python
-data = xgb.DMatrix('data/agaricus.txt.train#dtrain.cache')
-```
+we modify the code to the following to enable the external memory
+version:
 
-The external memory mode natively works on distributed version, for example, you can specify
-a path to your dataset stored in distributed file system:
+.. code:: python
 
-```python
-data = "hdfs://data/agaricus.txt.train#dtrain.cache"
-```
+    data = xgb.DMatrix('data/agaricus.txt.train#dtrain.cache')
+
+The external memory mode natively works on distributed version, for
+example, you can specify a path to your dataset stored in distributed
+file system:
+
+.. code:: python
+
+    data = "hdfs://data/agaricus.txt.train#dtrain.cache"

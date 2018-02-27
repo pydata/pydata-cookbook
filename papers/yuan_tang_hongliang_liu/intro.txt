@@ -1,5 +1,5 @@
 Introduction
--------------
+==================================
 
 Machine learning approaches are becoming more and more important nowadays:
 recommendation systems learn to generate recommendations of potential interest
