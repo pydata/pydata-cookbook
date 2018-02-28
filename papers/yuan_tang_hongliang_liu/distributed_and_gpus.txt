@@ -187,4 +187,4 @@ file system:
 
 .. code:: python
 
-    data = "hdfs://data/agaricus.txt.train#dtrain.cache"
+    data = xgb.DMatrix("hdfs://data/agaricus.txt.train#dtrain.cache")

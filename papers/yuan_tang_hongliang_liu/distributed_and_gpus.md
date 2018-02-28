@@ -161,5 +161,5 @@ The external memory mode natively works on distributed version, for example, you
 a path to your dataset stored in distributed file system:
 
 ```python
-data = "hdfs://data/agaricus.txt.train#dtrain.cache"
+data = xgb.DMatrix("hdfs://data/agaricus.txt.train#dtrain.cache")
 ```
