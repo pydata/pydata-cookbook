@@ -2,17 +2,18 @@
 
 Though XGBoost has been proven to be highly efficient and scalable by industries, research labs,
 and data science competitions, it usually take hours or even days to train a model on
-extremely large dataset. Building highly accurate models using gradient boosting also requires
+extremely large dataset. Building highly accurate models using gradient boosting algorithm also requires
 extensive parameter tuning. For example, a classification task may involve running the algorithm
 multiple times for different learning rates or maximum tree depths to explore the effect of different
 parameter combinations on classification metrics such as accuracy or AUC. In case of very
 large datasets that cannot fit into the memory of the machine, XGBoost can switch to out-of-core
 setting to smoothly scale to billions of training samples with limited computing resources.
+In addition, there's GPU implementation of XGBoost that could accelerate model training.
 
 
 ## Distributed training
 
-XGBoost can run in distributed settings with very scalable performance.
+XGBoost can train models in distributed settings without sacrificing its high performance.
 The results in the [original XGBoost paper](https://dl.acm.org/ft_gateway.cfm?id=2939785&type=pdf)
 shows that XGBoost’s performance scales linearly as we add more machines. XGBoost is
 able to handle the entire 1.7 billion data with only four machines which greatly shows the
@@ -37,7 +38,8 @@ save_period = 0
 eval_train = 1
 ```
 
-and then submit the distributed job to cluster, e.g. YARN, using
+and then submit the distributed job to cluster, e.g.
+[Apache Hadoop YARN](https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html), using
 [dmlc-submit](https://github.com/dmlc/dmlc-core/tree/master/tracker) script:
 
 ```
@@ -73,7 +75,7 @@ if xgb.rabit.get_rank() == 0:
 xgb.rabit.finalize()
 ```
 
-First, call `xgb.rabit.init()` to initialize the distribute training and then load the
+First of all, call `xgb.rabit.init()` to initialize the distribute training and then load the
 datasets. Note that the datasets will be automatically sharded in distributed mode.
 
 Users can use `xgb.rabit.get_rank()` to get the current process. In the above example,
@@ -89,6 +91,13 @@ dmlc-core/tracker/dmlc-submit  --cluster=local --num-workers=2 python dist.py
 
 ## GPU-accelerated training
 
+Advancements in hardware accelerators, such as graphic processing units (GPUs),
+often bring significant performance boost to machine learning algorithms. Frameworks
+such as [TensorFlow Estimators](https://dl.acm.org/citation.cfm?id=3098171) and
+[H2O4GPU](https://github.com/h2oai/h2o4gpu) provide GPU implementations of many
+machine learning algorithms to take advantage of hardware accelerations from
+multiple GPUs.
+
 A [CUDA](https://en.wikipedia.org/wiki/CUDA)-based implementation of the decision
 tree constructions is also available within XGBoost. The tree construction
 algorithm is executed exclusively on the graphics processing unit (GPU). It has shown
@@ -96,7 +105,7 @@ shown high performance with a variety of datasets and settings, e.g. sparse inpu
 
 Individual boosting iterations are executed in parallel within GPUs. An interleaved approach
 is used for shallow trees, switching to a more conventional radix sort-based approach for larger depths.
-We show speedups of between 3× and 6× using a Titan X compared to a 4 core i7 CPU, and 1.2× using
+There's 3 to 6 times speedup using a Titan X compared to a 4 core i7 CPU, and 1.2 times speedup using
 a Titan X compared to 2× Xeon CPUs (24 cores). The [original paper](https://peerj.com/articles/cs-127/)
 for XGBoost GPU implementation shows that it is possible to process the
 Higgs dataset with 10 million samples and 28 variables entirely within GPU memory.
@@ -140,7 +149,7 @@ If the data is too large to fit into the memory, e.g. large datasets from distri
 large datasets saved in libsvm format locally, users can switch to use the external memory version
 of XGBoost by making one simple change to the dataset file path.
 
-The external memory version takes in the following filename format:
+The native external memory version provided by XGBoost takes in the following filename format:
 `filename#cacheprefix`
 where the `filename` is the normal path to libsvm file to be loaded, `cacheprefix` is
 a path to a cache file that XGBoost will use for external memory cache.
@@ -163,3 +172,8 @@ a path to your dataset stored in distributed file system:
 ```python
 data = xgb.DMatrix("hdfs://data/agaricus.txt.train#dtrain.cache")
 ```
+
+Besides the native external memory version provided by XGBoost, there's also
+[dask-xgboost](https://github.com/dask/dask-xgboost) integration that allows
+distributed training of XGBoost model on larger-than-memory datasets using
+[Dask](https://github.com/dask/dask).

@@ -1,0 +1,16 @@
+References
+==========
+
+-  `XGBoost: A Scalable Tree Boosting
+   System <https://dl.acm.org/ft_gateway.cfm?id=2939785&type=pdf>`__
+-  `Latest documentation of
+   XGBoost <https://xgboost.readthedocs.io/en/latest/>`__
+-  `Accelerating the XGBoost algorithm using GPU
+   computing <https://peerj.com/articles/cs-127/>`__
+-  `Apache Hadoop
+   YARN <https://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/YARN.html>`__
+-  `TensorFlow
+   Estimators <https://dl.acm.org/citation.cfm?id=3098171>`__
+-  `H2O4GPU <https://github.com/h2oai/h2o4gpu>`__
+-  `dask-xgboost <https://github.com/dask/dask-xgboost>`__
+-  `Dask <https://github.com/dask/dask>`__
