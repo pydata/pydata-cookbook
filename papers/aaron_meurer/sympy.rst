@@ -3,9 +3,9 @@
 :institution: University of South Carolina
 :corresponding:
 
------
-SymPy
------
+=======
+ SymPy
+=======
 
 .. class:: abstract
 
@@ -125,6 +125,9 @@ The two expressions :math:`(x + 1)^2` and :math:`x^2 + 2x + 1` are
 mathematically identical, but as SymPy objects, they are different. We can see
 they have different types:
 
+.. TODO: LaTeX wants to make the quotes in the code curly.
+
+
 .. code-block:: python
 
    >>> type((x + 1)**2)
@@ -159,3 +162,64 @@ symbolically, use ``Eq``:
 
    >>> Eq(x, y)
    Eq(x, y)
+
+Pretty Printing for Interactive Use
+-----------------------------------
+
+The examples thus far have shown using SymPy in a vanilla Python session,
+which uses ``repr`` to show the output. SymPy has a wide variety of printing
+methods to make it easier to read expressions. For text-based terminal
+sessions, the ``pprint`` function will show a 2D text representation of an
+expression using Unicode characters.
+
+.. TODO: The paper build dies on Unicode characters. I would like to show an
+   example like this. Also this example will look like crap unless it uses
+   Deja Vu Sans Mono, so we should either use that font, or pick an example
+   other than an integral. Another option would be to include a screenshot.
+   But it would be cool if we could get the Unicode to work because then I
+   could "run" init_printing() in a code example and show the pretty output
+   for the rest of the chapter.
+
+   >>> pprint(Integral(exp(x), x))
+   ⌠
+   ⎮  x
+   ⎮ ℯ  dx
+   ⌡
+
+Several other printing methods and their outputs are shown in Table :label:`printingtable`.
+
+.. TODO: This table isn't building properly.
+
+
+   .. table:: Common printing functions in SymPy, with their output for
+              ``sin(x)*exp(x)``. :label:`printingtable`
+
+      +--------------------------+-----------------+--------------------------------------+
+      | Printing                 | Printing type   | Output on                            |
+      |function                  |                 |``exp(x)*sin(x)``                     |
+      +==========================+=================+======================================+
+      | str()                    | String          | exp(x)*sin(x)                        |
+      +--------------------------+-----------------+--------------------------------------+
+      | pprint()                 | Pretty print    | (TODO: not                           |
+      |                          |(Unicode)        |shown)                                |
+      +--------------------------+-----------------+--------------------------------------+
+      | pprint(use_unicode=False)| Pretty print    |     x                                |
+      |                          |(ASCII)          |    e *sin(x)                         |
+      +--------------------------+-----------------+--------------------------------------+
+      |         latex()          | LaTeX           |     e^{x}                            |
+      |                          |                 |\sin{\left (x                         |
+      |                          |                 |\right )}                             |
+      +--------------------------+-----------------+--------------------------------------+
+      |         srepr()          | Exact           |     Mul(exp(Symbol('x')),            |
+      |                          |representation   |sin(Symbol('x')))                     |
+      +--------------------------+-----------------+--------------------------------------+
+
+
+
+Whenever SymPy is used interactively, it is recommended to use the
+``init_printing`` function. This will make it so that the best pretty printing
+format is used automatically, so that it is not necessary to call a function
+such as ``pprint``. Furthermore, when using SymPy in the Jupyter notebook,
+``init_printing()`` will enable LaTeX math output using MathJax.
+
+.. TODO: Show a screenshot of the Jupyter notebook with init_printing() here
