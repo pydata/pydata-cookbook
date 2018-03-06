@@ -151,3 +151,11 @@ at random points.
 Neither method is foolproof. In general, it is mathematically impossible to
 prove if two expressions are identically equal or not, so any routine to do
 this in SymPy must be fundamentally heuristical in nature.
+
+Finally, if you simply wish to represent the equality :math:`a = b`
+symbolically, use ``Eq``:
+
+.. code-block:: python
+
+   >>> Eq(x, y)
+   Eq(x, y)
