@@ -22,7 +22,7 @@ SymPy
    symbolic mathematics, sympy
 
 Introduction
-------------
+============
 
 SymPy is a computer algebra system (CAS) library for Python. This means that
 it manipulates mathematical expressions in a symbolic way. To understand what
@@ -61,4 +61,93 @@ matrices, and code generation, to only name a few (a full list of SymPy
 features can be found at http://www.sympy.org/en/features.html).
 
 Using SymPy
------------
+===========
+
+Gotchas
+-------
+
+A primary design goal of SymPy is to act as a first-class Python citizen. This
+means that all operations in SymPy use idiomatic Python as much as possible.
+Users familiar with the Python language should fell at home in SymPy, although
+those coming from other computer algebra systems may be surprised by some of
+the design decisions. As the reader of this book is expected to be familiar
+with Python, we will point out some of the most relevant gotchas, but not
+dwell on them.
+
+The first thing is that all all symbolic variables, called "symbols" in SymPy
+parlance, must be defined manually. This is done with the ``symbols``
+function.
+
+.. code-block:: python
+
+   >>> y + 1
+   Traceback (most recent call last):
+     File "<stdin>", line 1, in <module>
+   NameError: name 'y' is not defined
+   >>> y = symbols('y')
+   >>> y + 1
+   y + 1
+
+Secondly, SymPy uses Python's operator overloading, meaning that expressions
+can be written more or less as you would any Python code.
+
+.. code-block:: python
+
+   >>> 3*y**2/4 + y - 1
+   3*y**2/4 + y - 1
+
+However, one minor gotcha is that Python will evaluate an expression such as
+``1/2`` as a float, while in SymPy an exact rational number is often
+preferred.
+
+.. code-block:: python
+
+   >>> y + 1/2
+   y + 0.5
+   >>> y + Rational(1, 2)
+   y + 1/2
+
+
+The third major gotcha to be aware of concerns Python's ``==`` operator. As a
+design decision, the ``==`` operator in SymPy always returns a boolean
+``True`` or ``False``. Furthermore, this result is strictly based on the
+*structural* equality of the two expressions, not the *mathematical* equality.
+For example,
+
+.. code-block:: python
+
+   >>> (x + 1)**2 == (x + 1)**2
+   True
+   >>> (x + 1)**2 == x**2 + 2*x + 1
+   False
+
+The two expressions :math:`(x + 1)^2` and :math:`x^2 + 2x + 1` are
+mathematically identical, but as SymPy objects, they are different. We can see
+they have different types:
+
+.. code-block:: python
+
+   >>> type((x + 1)**2)
+   <class 'sympy.core.power.Pow'>
+   >>> type(x**2 + 2*x + 1)
+   <class 'sympy.core.add.Add'>
+
+To test the mathematical equivalence of expresions, one can subtract them and
+call ``simplify``, checking if the result is ``0``:
+
+.. code-block:: python
+
+   >>> simplify((x + 1)**2 - (x**2 + 2*x + 1))
+   0
+
+There is also a method ``equals`` which tests the two expressions numerically
+at random points.
+
+.. code-block:: python
+
+   >>> ((x + 1)**2).equals(x**2 + 2*x + 1)
+   True
+
+Neither method is foolproof. In general, it is mathematically impossible to
+prove if two expressions are identically equal or not, so any routine to do
+this in SymPy must be fundamentally heuristical in nature.
