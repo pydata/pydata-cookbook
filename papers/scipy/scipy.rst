@@ -1,11 +1,3 @@
-:author: Evgeni Burovski
-:email: evgeny.burovskiy@gmail.com
-:institution: Higher School of Economics, Russia
-
-:author: Ralf Gommers
-:email: ralf.gommers@gmail.com
-:institution: Scion, PO Box 3020, Rotorua, New Zealand
-
 :author: Warren Weckesser
 :email: warren.weckesser@gmail.com
 
@@ -26,9 +18,9 @@
     same size as and side-by-side with the z.  Using `a_{_N}` makes it
     very clear that N is a subscript of a.
 
------
-SciPy
------
+-------------------------------------
+Discrete-time Linear Filters in SciPy
+-------------------------------------
 
 .. class:: abstract
 
@@ -36,26 +28,46 @@ The SciPy_ library is one of the core packages of the PyData stack.  It
 includes modules for statistics, optimization, interpolation, integration,
 linear algebra, Fourier transforms, signal and image processing, ODE solvers,
 special functions, sparse matrices, and more.
+In this chapter, we demonstrate many of the tools provided by the ``signal``
+subpackage of the SciPy library for the design and analysis of linear
+filters for discrete-time signals, including filter representation,
+frequency response computation and optimal FIR filter design.
+
 
 
 .. _SciPy: http://scipy.org/scipylib/index.html
 
 .. class:: keywords
 
-algorithms, optimization, statistics, linear algebra, signal processing,
-sparse matrix, interpolation, numerical integration, special functions
+algorithms, signal processing,  IIR filter, FIR filter
 
 .. contents::
 
 Introduction
 ============
+The SciPy_ library, created in 2001, is one of the core packages of the
+PyData stack.  It includes modules for statistics, optimization,
+interpolation, integration, linear algebra, Fourier transforms, signal
+and image processing, ODE solvers, special functions, sparse matrices,
+and more.
 
-[TO DO...]
+The ``signal`` subpackage within the SciPy library includes tools
+for several areas of computation, including signal processing, interpolation,
+linear systems analysis and even some elementary image processing.  In this
+Cookbook chapter, we focus on specific subset of the capabilities of
+of this subpackage: the design and analysis of linear filters for discrete-time
+signals.
+The chapter is split into two main parts, covering
+the two broad categories of linear filters: *infinite impulse
+response* (IIR) filters and *finite impulse response* (FIR) filters.
 
-There are two main classes of linear filters: *finite impulse response* (FIR)
-filters, and *infinite impulse response* (IIR) filters. 
-In the following two sections, we will discuss many of the functions
-that SciPy provides for the design and analysis of both types of filters.
+*Note.* We will display some code samples as transcripts from the standard Python
+interactive shell.  In each interactive Python session, we will have executed
+the following without showing it::
+
+   >>> import numpy as np
+   >>> np.set_printoptions(precision=3, linewidth=50)
+
 
 IIR filters in ``scipy.signal``
 ===============================
@@ -70,22 +82,32 @@ values of :math:`x` and the `N` previous values of :math:`y`:
    a_{_0} y_{_n} = \sum_{i=0}^{M} b_{_i}x_{_{n-i}} -
                   \sum_{i=1}^{N} a_{_i} y_{_{n-N}} 
 
-(See, for example, Oppenheim and Schafer [OS]_, Chapter 6.  Note, however,
-that SciPy uses a different sign convention for ``a[1], ..., a[N]``.)
+(See, for example, Oppenheim and Schafer [OS]_, Chapter 6.
+Note, however, that the sign convention for ``a[1], ..., a[N]``
+in Eqn. (:ref:`eq-filter-recurrence`) and used in SciPy is the opposite
+of that used in Oppenheim and Schafer.)
 
-The rational transfer function describing this filter in the
-z-transform domain is
+By taking the z-transform of Eqn. (:ref:`eq-filter-recurrence`),
+we can express the filter as
+
+.. math::
+   :label: eq-z-transform
+
+   Y(z) = H(z)X(z)
+
+where
 
 .. math::
    :label: eq-transfer-function
 
-    Y(z) = \frac{b_{_0} + b_{_1} z^{-1} + \cdots + b_{_M} z^{-M}}
-                {a_{_0} + a_{_1} z^{-1} + \cdots + a_{_N} z^{-N}} X(z)
+   H(z) = \frac{b_{_0} + b_{_1} z^{-1} + \cdots + b_{_M} z^{-M}}
+               {a_{_0} + a_{_1} z^{-1} + \cdots + a_{_N} z^{-N}}
 
+is the *transfer function* associated with the filter.
 The functions in SciPy that create filters generally set
 :math:`a_{_0} = 1`.
 
-Eqn. (:ref:`eq-filter-recurrence`) is also know as an ARMA(N, M)
+Eqn. (:ref:`eq-filter-recurrence`) is also known as an ARMA(N, M)
 process, where "ARMA" stands for *Auto-Regressive Moving Average*.
 :math:`b` holds the moving average coefficients, and :math:`a` holds the
 auto-regressive coefficients.
@@ -106,7 +128,7 @@ SciPy also provides a state space representation,
 but we won't discuss that format here.
 
 **Transfer function.**
-The *transfer function* representation of
+The transfer function representation of
 a filter in SciPy is the most direct representation of the data in
 Eqn. (:ref:`eq-filter-recurrence`) or (:ref:`eq-transfer-function`).
 It is two one-dimensional arrays, conventionally
@@ -118,10 +140,7 @@ For example, we can use the function ``scipy.signal.butter`` to
 create a Butterworth lowpass filter of order 6 with a normalized
 cutoff frequency of 1/8 the Nyquist frequency.  The default representation
 created by ``butter`` is the transfer function, so we can use
-``butter(6, 0.125)``.
-(For conciseness, we use
-``numpy.set_printoptions(precision=3, linewidth=50)``
-in all interactive Python sessions.)::
+``butter(6, 0.125)``::
 
     >>> from scipy.signal import butter
     >>> b, a = butter(6, 0.125)
@@ -140,8 +159,9 @@ large order using this format is susceptible to instability from numerical
 errors.  Problems can arise when designing a filter of high order, or a
 filter with very narrow pass or stop bands.
 
+
 **ZPK.**
-The *ZPK* representation consists of a tuple containing three
+The ZPK representation consists of a tuple containing three
 items, ``(z, p, k)``.  The first two items, ``z`` and ``p``, are
 one-dimensional arrays containing the zeros and poles, respectively,
 of the transfer function.  The third item, ``k``, is a scalar that holds
@@ -160,14 +180,13 @@ by using the argument ``output="zpk"``::
     >>> k
     2.8825891944002783e-05
 
-A limitation of the ZPK representation is that SciPy does
-not provide functions that can directly apply it as a
-filter to a signal.  The ZPK representation must be converted
-to either the SOS format or the transfer function format
-to actually filter a signal.   We could convert the values
-``(z, p, k)`` to SOS, but in that case, we might as well create
-the filter in SOS format at the start by using the argument
-``output="sos"`` of the IIR filter design function.
+A limitation of the ZPK representation of a filter is that SciPy does
+not provide functions that can directly apply the filter to a signal.
+The ZPK representation must be converted to either the SOS format or the
+transfer function format to actually filter a signal.  If we are designing
+a filter using ``butter`` or one of the other filter design functions,
+we might as well create the filter in the transfer function or SOS format
+when the filter is created.
 
 **SOS.**
 In the *second order sections (SOS)* representation, the filter is represented
@@ -180,12 +199,14 @@ of the denominator.
 
 The SOS format for an IIR filter is more numerically stable than the
 transfer function format, so it should be preferred when using filters
-with orders beyond, say, 7 or 8.
+with orders beyond, say, 7 or 8, or when the bandwidth of the passband
+of a filter is sufficiently small.  (Unfortunately, we don't have a precise
+specification for what "sufficiently small" is.)
 
 A disadvantage of the SOS format is that the function ``sosfilt`` (at
 least at the time of this writing) applies an SOS filter by making
 multiple passes over the data, once for each second order section.
-Some tests with, for example, an order 8 filter show that
+Some tests with an order 8 filter show that
 ``sosfilt(sos, x)`` can require more than twice the time of
 ``lfilter(b, a, x)``.
 
@@ -348,7 +369,6 @@ appears to level off.
 
 We are not interested in the oscillations, but we are interested in the mean
 value around which the signal is oscillating.
-
 To preserve the slowly varying behavior while eliminating the high frequency
 oscillations, we'll apply a low-pass filter.  To apply the filter, we can
 use either ``sosfilt`` or ``sosfiltfilt`` from ``scipy.signal``.
@@ -378,7 +398,7 @@ scaling the values to the units expected by ``scipy.signal.butter``.
     def butter_lowpass_filtfilt(data, cutoff, fs,
                                 order):
         sos = butter_lowpass(cutoff, fs, order=order,
-                              output='sos')
+                             output='sos')
         y = sosfiltfilt(sos, data)
         return y
 
@@ -395,17 +415,17 @@ Figure :ref:`fig-pressure-example-filtered`.
    :label:`fig-pressure-example-filtered`
 
 **Comments on creating a spectrogram.**
-A spectrogram is basically a plot of the power spectrum of
+A spectrogram is a plot of the power spectrum of
 a signal computed repeatedly over a sliding time window.
 The spectrograms in Figures :ref:`fig-pressure-example-input`
 and :ref:`fig-pressure-example-filtered` were created using ``spectrogram``
 from ``scipy.signal`` and ``pcolormesh`` from ``matplotlib.pyplot``.
 The function ``spectrogram`` has several options that control how
 the spectrogram is computed.  It is quite flexible, but obtaining a plot
-that effectively illustrates the time-varying spectrum of a signal might
-require exploring the possible parameters.  In keeping with the "cookbook"
-theme of this book, we include here the details of how those plots
-were generated.
+that effectively illustrates the time-varying spectrum of a signal sometimes
+requires experimentation with the parameters.
+In keeping with the "cookbook" theme of this book, we include here the
+details of how those plots were generated.
 
 Here is the essential part of the code that computes the spectrograms.
 ``pressure`` is the one-dimensional array of measured data.
@@ -425,7 +445,8 @@ the same arguments:
 
 .. code-block:: python
 
-    f, t, filteredspec = spectrogram(pressure_filtered, ...)
+    f, t, filteredspec = spectrogram(pressure_filtered,
+                                     ...)
 
 Notes:
 
@@ -449,7 +470,7 @@ First we convert the data to decibels:
 .. code-block:: python
 
     spec_db = 10*np.log10(spec)
-    filteredspec_db = 10*np.log10(filtered_spec)
+    filteredspec_db = 10*np.log10(filteredspec)
 
 Next we find the limits that we will use in the call to ``pcolormesh`` to ensure
 that the two spectrograms use the same color scale.  ``vmax`` is the overall max,
@@ -766,8 +787,8 @@ FIR filters in ``scipy.signal``
 
 A finite impulse response filter is basically a weighted moving
 average.  Given an input sequence :math:`{x_{_n}}` and the :math:`M+1`
-filter coefficient :math:`\{b_{_0}, \ldots, b_{_M}\}`, the filtered
-output :math:`{y_{_n}}` is computed as discrete convolution of
+filter coefficients :math:`\{b_{_0}, \ldots, b_{_M}\}`, the filtered
+output :math:`{y_{_n}}` is computed as the discrete convolution of
 :math:`x` and :math:`b`:
 
 .. math::
@@ -783,8 +804,10 @@ has :math:`M + 1` coefficients.  It is common to say that the filter has
 Apply a FIR filter
 ------------------
 
-To apply a FIR filter to a signal, we use one of the convolution functions
-available in NumPy or SciPy, such as ``scipy.signal.convolve``.
+To apply a FIR filter to a signal, we can use ``scipy.signal.lfilter``
+with the denominator set to the scalar 1, or we can use one of the
+convolution functions available in NumPy or SciPy, such as
+``scipy.signal.convolve``.
 For a signal :math:`\{x_{_0}, x_{_1}, \ldots, x_{_{S-1}}\}` of finite length
 :math:`S`, Eq. (:ref:`eq-fir-filter`)
 doesn't specify how to compute the result for :math:`n < M`.
@@ -875,12 +898,12 @@ were generated with this code:
    number of taps (i.e. the length of the sliding window).
    :label:`fig-moving-avg-freq-response`
 
-The function ``freqz`` always returns the frequencies
+The function ``freqz`` returns the frequencies
 in units of radians per sample, which is why the values on the abscissa
 in Figure :ref:`fig-moving-avg-freq-response` range from 0 to :math:`\pi`.
 In calculations where we have a given sampling frequency
 :math:`f_s`, we usually convert the frequencies returned by ``freqz``
-to dimensional units by multiplying by :math:`\frac{f_s}{2\pi}`.
+to dimensional units by multiplying by :math:`f_s/(2\pi)`.
 
 
 FIR filter design
@@ -1140,7 +1163,7 @@ We'll use 31 taps.
 
     numtaps = 31
 
-    taps = remez(numtaps, bands, desired, Hz=fs)
+    taps = remez(numtaps, bands, desired, fs=fs)
 
 The frequency response of this filter is the curve labeled ``(a)``
 in Fig. :ref:`fig-remez-example-31taps`.
@@ -1152,7 +1175,7 @@ we'll adjust the weights, as follows:
 .. code-block:: python
 
     weights = [1, 25, 1]
-    taps2 = remez(numtaps, bands, desired, weights, Hz=fs)
+    taps2 = remez(numtaps, bands, desired, weights, fs=fs)
 
 The frequency response of this filter is the curve labeled ``(b)``
 in Fig. :ref:`fig-remez-example-31taps`.
@@ -1201,7 +1224,8 @@ FIR filter design: linear programming
 -------------------------------------
 
 The design problem solved by the Parks-McClellan method can also
-be formulated as a linear programming problem.
+be formulated as a linear programming problem
+([Rabiner1972a]_ [Rabiner1972b]_).
 
 To implement this method, we'll use the function ``linprog`` from
 ``scipy.optimize``.  In particular, we'll use the interior point
@@ -1212,10 +1236,9 @@ the implementation.
 **Formulating the design problem as a linear program.**
 Like the Parks-McClellan method, this approach is a "minimax"
 optimization of Eq. (:ref:`eq-weighted-error-omega`).
-Our description follows the explanation in Ivan Selesnick's lecture
-notes [Selesnick]_.  This formulation is for a Type I filter (that is,
-an odd number of taps with even symmetry), but
-the same ideas can be applied to other FIR filter types.
+We'll give the formulation for a Type I filter design (that is,
+an odd number of taps with even symmetry), but the same ideas
+can be applied to other FIR filter types.
 
 For convenience, we'll consider the FIR filter coefficients for
 a filter of length :math:`2R + 1` using *centered* indexing:
@@ -1246,7 +1269,7 @@ choose the filter coefficients such that
     |E(\omega)| \le \epsilon \quad \textrm{for}\quad 0 \le \omega \le \pi
 
 for the smallest possible value of :math:`\epsilon`.  After substituting the
-expression of :math:`E(\omega)` in Eq. (:ref:`eq-weighted-error-omega`),
+expression for :math:`E(\omega)` from Eqn. (:ref:`eq-weighted-error-omega`),
 replacing the absolute value with two inequalities, and doing a little
 algebra, the problem can be written as
 
@@ -1254,7 +1277,7 @@ algebra, the problem can be written as
 
     \begin{split}
     \textrm{minimize} \quad & \epsilon \\
-    \textrm{over} \quad & \left\{p_{_0},\, p_{_1},\, \ldots,\, p_{_M},\, \epsilon\right\} \\
+    \textrm{over} \quad & \left\{p_{_0},\, p_{_1},\, \ldots,\, p_{_R},\, \epsilon\right\} \\
     \textrm{subject to} \quad & A(\omega) - \frac{\epsilon}{W(\omega)} \le D(\omega) \\
     \textrm{and}    \quad   & -A(\omega) - \frac{\epsilon}{W(\omega)} \le -D(\omega)
     \end{split}
@@ -1382,7 +1405,7 @@ the grid of all the frequency samples.
     wgrid = np.concatenate((wpgrid, wsgrid))
 
 Let ``wtpass`` and ``wtstop`` be the constant weights
-that we will use in the pass and stop bands, respectivley.
+that we will use in the pass and stop bands, respectively.
 We create the array of weights on the grid with
 
 .. code-block:: python
@@ -1695,7 +1718,7 @@ Now we'll use ``remez`` to design the filter.
                         trans_hi, 0.5*fs],
                  desired=[1, 0],
                  weight=[1/deltap, 1/deltas],
-                 Hz=fs)
+                 fs=fs)
 
 The frequency response of the filter is shown in Figure :ref:`fig-opt-lowpass`.
 We see that the filter meets the design specifications.
@@ -1735,15 +1758,20 @@ References
 .. [PM]
    Parks-McClellan filter design algorithm.  Wikipedia,
    https://en.wikipedia.org/wiki/Parks%E2%80%93McClellan_filter_design_algorithm
+.. [Rabiner1972a]
+   L. R. Rabiner, The design of finite impulse response digital filters
+   using linear programming techniques,
+   *The Bell System Technical Journal*, Vol. 51, No. 6, July-August, 1972.
+.. [Rabiner1972b]
+   L. R. Rabiner, Linear program design of finite impulse response (FIR)
+   digital filters,
+   *IEEE Trans. on Audio and Electroacoustics*, Vol. AU-20, No. 4, Oct. 1972.
 .. [RemezAlg]
    Remez algorithm. Wikipedia, ``https://en.wikipedia.org/wiki/Remez_algorithm``
 .. [SavGol]
    A. Savitzky, M. J. E. Golay. Smoothing and Differentiation of Data by
-   Simplified Least Squares Procedures. Analytical Chemistry, 1964, 36 (8),
+   Simplified Least Squares Procedures. *Analytical Chemistry*, 1964, 36 (8),
    pp 1627-1639.
-.. [Selesnick]
-   Ivan Selesnick, Linear-phase FIR filter design by linear programming.
-   XXX Note found on the web--FIXME! XXX
 .. [SO]
    Nimal Naser, How to filter/smooth with SciPy/Numpy?, 
    ``https://stackoverflow.com/questions/28536191``
