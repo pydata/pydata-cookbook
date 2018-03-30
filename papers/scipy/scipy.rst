@@ -18,9 +18,9 @@
     same size as and side-by-side with the z.  Using `a_{_N}` makes it
     very clear that N is a subscript of a.
 
--------------------------------------
-Discrete-time Linear Filters in SciPy
--------------------------------------
+--------------------------------------------
+Signal Processing with SciPy: Linear Filters
+--------------------------------------------
 
 .. class:: abstract
 
@@ -54,9 +54,11 @@ and more.
 The ``signal`` subpackage within the SciPy library includes tools
 for several areas of computation, including signal processing, interpolation,
 linear systems analysis and even some elementary image processing.  In this
-Cookbook chapter, we focus on specific subset of the capabilities of
+Cookbook chapter, we focus on a specific subset of the capabilities of
 of this subpackage: the design and analysis of linear filters for discrete-time
-signals.
+signals.  These filters are commonly used in digital signal processing (DSP)
+for audio signals and other time series data with a fixed sample rate.
+
 The chapter is split into two main parts, covering
 the two broad categories of linear filters: *infinite impulse
 response* (IIR) filters and *finite impulse response* (FIR) filters.
@@ -66,8 +68,14 @@ interactive shell.  In each interactive Python session, we will have executed
 the following without showing it::
 
    >>> import numpy as np
+   >>> import matplotlib.pyplot as plt
    >>> np.set_printoptions(precision=3, linewidth=50)
 
+Also, when we show the creation of plots in the transcripts, we won't
+show all the other plot commands (setting labels, grid lines, etc.)
+that were actually used to create the corresponding figure in the paper.
+Complete scripts for all the figures in this paper are available
+in the ``papers/scipy`` directory at ``https://github.com/pydata/pydata-cookbook/``.
 
 IIR filters in ``scipy.signal``
 ===============================
@@ -268,8 +276,6 @@ an array of ones::
     >>> plt.plot(y)
 
 The plot is shown in Figure :ref:`fig-unstable-butterworth`.
-(We haven't shown all the additional ``matplotlib`` function calls that
-we used to annotate the plot.)
 Clearly something is going wrong.
 
 .. figure:: figs/unstable_butterworth.pdf
@@ -317,9 +323,6 @@ We can check the frequency response using ``scipy.signal.sosfreqz``::
     >>> w, h = sosfreqz(sos, worN=8000)
     >>> plt.plot(w/np.pi, np.abs(h))
     [<matplotlib.lines.Line2D at 0x109ae9550>]
-    >>> plt.grid(alpha=0.25)
-    >>> plt.xlabel('Normalized frequency')
-    >>> plt.ylabel('Gain')
 
 The plot is shown in Figure :ref:`fig-sos-bandpass-response-freq`.
 
@@ -334,7 +337,6 @@ As above, we compute the step response by filtering an array of ones::
     >>> x = np.ones(200)
     >>> y = sosfilt(sos, x)
     >>> plt.plot(y)
-    >>> plt.grid(alpha=0.25)
 
 The plot is shown in Figure :ref:`fig-sos-bandpass-response-step`.
 With the SOS representation, the filter behaves as expected.
