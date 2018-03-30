@@ -1,4 +1,6 @@
-# Distributed and GPU-accelerated XGBoost
+# Title place holder (not to show in rst)
+
+## Distributed and GPU-accelerated XGBoost
 
 Though XGBoost has been proven to be highly efficient and scalable by industries, research labs,
 and data science competitions, it usually take hours or even days to train a model on
@@ -11,7 +13,7 @@ setting to smoothly scale to billions of training samples with limited computing
 In addition, there's GPU implementation of XGBoost that could accelerate model training.
 
 
-## Distributed training
+### Distributed training
 
 XGBoost can train models in distributed settings without sacrificing its high performance.
 The results in the [original XGBoost paper](https://dl.acm.org/ft_gateway.cfm?id=2939785&type=pdf)
@@ -89,7 +91,7 @@ We can then submit the Python script using the same dmlc-submit script that we u
 dmlc-core/tracker/dmlc-submit  --cluster=local --num-workers=2 python dist.py
 ```
 
-## GPU-accelerated training
+### GPU-accelerated training
 
 Advancements in hardware accelerators, such as graphic processing units (GPUs),
 often bring significant performance boost to machine learning algorithms. Frameworks
@@ -143,7 +145,7 @@ can switch to only use CPU for making predictions by changing `predictor` parame
 to `cpu_predictor` to help conserve GPU memory. There's also "gpu_id" parameter that
 can be used to select the device ordinal.
 
-## External memory
+### External memory
 
 If the data is too large to fit into the memory, e.g. large datasets from distributed file systems or
 large datasets saved in libsvm format locally, users can switch to use the external memory version

@@ -1,5 +1,8 @@
-Distributed and GPU-accelerated XGBoost
+Title place holder (not to show in rst)
 =======================================
+
+Distributed and GPU-accelerated XGBoost
+---------------------------------------
 
 Though XGBoost has been proven to be highly efficient and scalable by
 industries, research labs, and data science competitions, it usually
@@ -16,7 +19,7 @@ addition, there's GPU implementation of XGBoost that could accelerate
 model training.
 
 Distributed training
---------------------
+********************
 
 XGBoost can train models in distributed settings without sacrificing its
 high performance. The results in the `original XGBoost
@@ -104,7 +107,7 @@ that we used earlier:
     dmlc-core/tracker/dmlc-submit  --cluster=local --num-workers=2 python dist.py
 
 GPU-accelerated training
-------------------------
+************************
 
 Advancements in hardware accelerators, such as graphic processing units
 (GPUs), often bring significant performance boost to machine learning
@@ -167,7 +170,7 @@ to ``cpu_predictor`` to help conserve GPU memory. There's also "gpu\_id"
 parameter that can be used to select the device ordinal.
 
 External memory
----------------
+***************
 
 If the data is too large to fit into the memory, e.g. large datasets
 from distributed file systems or large datasets saved in libsvm format

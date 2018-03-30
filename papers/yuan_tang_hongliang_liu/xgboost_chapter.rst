@@ -38,9 +38,13 @@ XGBoost: A Portable Distributed Gradient Boosting Library
 
 .. include:: papers/yuan_tang_hongliang_liu/intro.txt
 
+.. include:: papers/yuan_tang_hongliang_liu/vs_gbdt.txt
+
 .. include:: papers/yuan_tang_hongliang_liu/main_functionalities.txt
 
 .. include:: papers/yuan_tang_hongliang_liu/parameter_explained.txt
+
+.. include:: papers/yuan_tang_hongliang_liu/model_tune.txt
 
 .. include:: papers/yuan_tang_hongliang_liu/distributed_and_gpus.txt
 
