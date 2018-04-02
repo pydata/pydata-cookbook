@@ -23,7 +23,8 @@ discussion or pull request.
 - Computational content should, likewise, be verified.
 - The work should describe the development or use of python software for 
   approaching a problem of relevance to the SciPy community (as defined
-  by, for instance, the domains covered by the SciPy conference).
+  by, for instance, the domains covered by the 
+  [SciPy conference](http://conference.scipy.org).
 
 ## Verifiability
 

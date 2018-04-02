@@ -96,8 +96,7 @@ These dates are the
 
 ## Review Criteria
 
-Please follow the included [review
-criteria](https://github.com/pydata/pydata-cookbook/blob/master/review_criteria.md).
+Please follow the included [review criteria](review_criteria.md).
 Suggestions and amendments to these review criteria are enthusiastically
 welcomed via discussion or pull request. 
 
