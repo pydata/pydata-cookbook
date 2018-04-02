@@ -6,7 +6,7 @@ The book will cover several major topics, organized as such, with some sample pa
 
 - IDE: IPython/Jupyter
 - Data Structures / Numerics: NumPy, Pandas, Xray, PyTables
-- Viz: Matplotlib, Bokeh, Seaborn, yt
+- Viz: Matplotlib, PyViz (HoloViews, Bokeh, Datashader), Seaborn, yt
 - Algorithms / Science: SciPy, Scikit-learn, Scikit-image, statsmodels, sympy, gensim, XGBoost
 - Performance / Scale: Cython, Numexpr, Numba, Dask, pyspark
 
@@ -26,10 +26,9 @@ A: We can use chapters for documentation of projects but not a collection of all
 
 ## Instructions for Reviewers
 
-- Click on the Pull Requests Tab and browse to find the papers assigned to you
+- Click on the Pull Requests Tab and browse to find the chapters assigned to you
 - After reading the paper, you can start the review conversation by simply commenting
-  on the paper, taking into consideration
-  [this set of suggested review criteria](https://github.com/scipy-conference/scipy_proceedings/blob/master/review_criteria.md).
+  on the chapter, taking into consideration [the suggested review criteria](review_criteria.md).
 - Authors will then respond to the comments and/or modify the paper to address the comments. 
 - This will begin an iterative review process where authors and reviewers can discuss the
   evolving submission.
@@ -41,10 +40,10 @@ A: We can use chapters for documentation of projects but not a collection of all
 
 ## Instructions for Authors
 
-Submissions must be received by **Nov 15th** at 23:59 PST, but modifications are
+Submissions must be received by **March 31st, 2018** at 23:59 PST, but modifications are
 allowed during the open review period which ends Dec 15th at 18:00 PST.  Submissions are
 considered received once a Pull Request has been opened following the procedure
-outlines below.
+outlined below.
 
 Papers are formatted using reStructuredText and the compiled version should be
 no longer than 25 pages, including figures.  Here are the steps to produce a
@@ -97,11 +96,10 @@ These dates are the
 
 ## Review Criteria
 
-A small subcommittee of the SciPy 2016 organizing committee has created [this
-set of suggested review
-criteria](https://github.com/pydata/pydata-cookbook/blob/master/review_criteria.md)
-to help guide authors and reviewers alike. Suggestions and amendments to these
-review criteria are enthusiastically welcomed via discussion or pull request.
+Please follow the included [review
+criteria](https://github.com/pydata/pydata-cookbook/blob/master/review_criteria.md).
+Suggestions and amendments to these review criteria are enthusiastically
+welcomed via discussion or pull request. 
 
 ## Other markup
 
@@ -135,7 +133,7 @@ sudo apt-get install python-docutils texlive-latex-base texlive-publishers \
 
 Note you will still need to install `docutils` with `easy-install` or `pip` even on a Debian system.
 
-On Fedora, the package names are slightly different
+On Fedora, the package names are slightly different:
 
 ```
 su -c `dnf install python-docutils texlive-collection-basic texlive-collection-fontsrecommended texlive-collection-latex texlive-collection-latexrecommended texlive-collection-latexextra texlive-collection-publishers texlive-collection-bibtexextra`
