@@ -53,7 +53,7 @@ paper:
   [pydata-cookbook](https://github.com/pydata/pydata-cookbook)
   repository on GitHub.
 
-- An example paper is provided in ``papers/00_vanderwalt``.  Create a new
+- An example paper is provided in ``examples/00_vanderwalt``.  Create a new
   directory ``papers/firstname_surname``, copy the example paper into it, and
   modify to your liking.
 
