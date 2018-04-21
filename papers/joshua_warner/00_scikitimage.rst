@@ -4,7 +4,7 @@
 :first-author:
 
 :author: Alexandre F. de Siqueira
-:email: alexandredesiqueira@programandociencia.com
+:email: afdesiqueira@protonmail.com
 :institution: University of Campinas, Campinas, Brazil
 :institution: TU Bergakademie Freiberg, Freiberg, Germany
 :equal-contributor:
