@@ -1,9 +1,11 @@
 # Suggested Review Criteria for PyData Cookbook
 
-A small subcommittee of the SciPy 2016 organizing committee has created this 
-set of suggested review criteria
-to help guide authors and reviewers alike. Suggestions and amendments to these 
-review criteria are enthusiastically welcomed via discussion or pull request.
+These criteria have been adapted from [the review criteria developed
+by a small subcommittee of the SciPy 2016 organizing 
+committee](https://github.com/scipy-conference/scipy_proceedings/blob/master/review_criteria.md).
+The goal is to help guide authors and reviewers alike. Suggestions and
+amendments to these review criteria are enthusiastically welcomed via
+discussion or pull request.
 
 
 ## Written Quality
@@ -12,15 +14,17 @@ review criteria are enthusiastically welcomed via discussion or pull request.
 - Prose should clearly communicate the narrative.
 - The written style should convey information that furthers the knowledge or 
   research of the reader.
-- Due to the interdisciplinary nature of SciPy, highly domain-specific jargon 
-  should be avoided or explained where possible.
+- Due to the interdisciplinary nature of the SciPy community, highly 
+  domain-specific jargon should be avoided or explained where possible.
 
 ## Technical Content
 
 - The technical content should be scientifically sound.
 - Computational content should, likewise, be verified.
 - The work should describe the development or use of python software for 
-  approaching a problem in a domain within the scope of the conference.
+  approaching a problem of relevance to the SciPy community (as defined
+  by, for instance, the domains covered by the 
+  [SciPy conference](http://conference.scipy.org).
 
 ## Verifiability
 
@@ -43,7 +47,7 @@ review criteria are enthusiastically welcomed via discussion or pull request.
 
 ### Length
 
-- The compiled version should be no longer than 15 pages, including figures.  
+- The compiled version should be no longer than 15 pages, including figures.
 
 ### Figures
 
