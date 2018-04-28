@@ -797,15 +797,15 @@ standalone server:
 
 .. code:: ipython3
 
-    import param, parambokeh
+    import param as pm, parambokeh
     from colorcet import cm_n
     from holoviews.streams import RangeXY
     
     class NYCTaxi(hv.streams.Stream):
-        alpha = param.Magnitude(default=0.75, doc="Opacity")
-        colormap = param.ObjectSelector(default=cm_n["fire"],
+        alpha = pm.Magnitude(default=0.75, doc="Opacity")
+        colormap = pm.ObjectSelector(default=cm_n["fire"],
             objects=cm_n.values())
-        location = param.ObjectSelector(default='dropoff',
+        location = pm.ObjectSelector(default='dropoff',
             objects=['dropoff', 'pickup'])
     
         def make_view(self, x_range, y_range, **kwargs):
